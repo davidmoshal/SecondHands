@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Pose candidates and Qualcomm handoff added
+
+Added [pose model candidates and the Qualcomm handoff](references/models/pose-candidates.md) after Qualcomm staff recommended RTMPose: a comparison of RTMPose, YOLO-pose, RTMO, MediaPipe Pose, HRNet/LiteHRNet, Posenet, MoveNet, and ViTPose with their ExecuTorch routes and NPU evidence, what needs training, and the handoff pack. Added the untested `experiments/qnn_export_pose.py` recipe, a Qualcomm section and RTMPose row in [the tech stack](design/tech-stack.md#working-with-the-qualcomm-engineer), a pointer from [the model index](references/models/index.md), SH-T-056 in [the plan](plan.md#movement-tracker), and source SH-S-021. No conversion was run.
+
 ## 2026-10-17 — Tailscale access procedure added
 
 Added [the Tailscale access section](runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale) to the runbook with the user-reported laptop name `qcworkshop27.tail2122cc.ts.net`, Windows OpenSSH Server setup, Mac connection and port-forwarding commands, and the Tailscale SSH limitation on Windows. Updated SH-T-036 in [the plan](plan.md#snapdragon-deployment), [Project direction](project.md#established-user-direction), [the laptop page](hardware/snapdragon-x-elite.md#deployment-checks), and source record SH-S-020. The procedure is documentation-derived; no connection has been tested.
