@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SecondHands Live</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Layout: setup strip, then camera left and guidance right; Home and Clinic share the camera and swap the right column. */
+  :root {
+    --bg: #f4f1ea; --panel: #ffffff; --panel-2: #f8f6f1; --fg: #1f2a24; --muted: #5f6b64; --line: #dcd7cc;
+    --accent: #1f7a5c; --accent-soft: #dcefe6; --accent-ink: #ffffff; --warm: #c2641f; --warm-soft: #f8e6d6; --bad: #a63a3a; --bad-soft: #f6dddd;
+    --font-home: "Atkinson Hyperlegible", "IBM Plex Sans", Arial, sans-serif; --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; --font-mono: "IBM Plex Mono", Menlo, Consolas, monospace; --home-scale: 1;
+  }
+  @media (prefers-color-scheme: dark) { :root { --bg: #141815; --panel: #1c211d; --panel-2: #232925; --fg: #ebeee9; --muted: #a3ada6; --line: #333b35; --accent: #6fcaa7; --accent-soft: #1e3a30; --accent-ink: #0f1512; --warm: #e8a062; --warm-soft: #3b2a1b; --bad: #ef8b8b; --bad-soft: #3d2222; color-scheme: dark; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.45; padding: 14px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px)); }
+  .wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 14px; }
+  .top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+  .brand { font-weight: 600; display: flex; align-items: center; gap: 8px; } .brand i { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  .spacer { flex: 1; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--panel-2); }
+  .seg button { all: unset; cursor: pointer; padding: 7px 16px; border-radius: 999px; font-weight: 600; color: var(--muted); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+  button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.74rem; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+  .pill.plain { background: transparent; border: 1px solid var(--line); color: var(--muted); } .pill.warm { background: var(--warm-soft); color: var(--warm); } .pill.bad { background: var(--bad-soft); color: var(--bad); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .setup { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+  select, .btn { font: inherit; font-size: 0.92rem; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); }
+  .btn { cursor: pointer; font-weight: 600; } .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); } .btn.danger { color: var(--bad); border-color: var(--bad); } .btn:disabled { opacity: 0.5; cursor: default; }
+  label.chk { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 0.9rem; }
+  .status { font-size: 0.88rem; color: var(--muted); } .status.bad { color: var(--bad); }
+  .main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr); gap: 14px; }
+  .cam { position: relative; border-radius: 14px; overflow: hidden; background: #0e1311; aspect-ratio: 4 / 3; max-width: 100%; }
+  .cam video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+  .cam canvas { width: 100%; height: 100%; display: block; }
+  .cam .tag { position: absolute; left: 12px; top: 12px; display: flex; gap: 6px; flex-wrap: wrap; } .cam .tag .pill { background: rgba(0,0,0,0.5); color: #e6ebe7; } .cam .tag .pill.ok { color: #8fe3cc; }
+  .cam .empty { position: absolute; inset: 0; display: grid; place-items: center; color: #cfd8d2; text-align: center; padding: 24px; font-size: 1.05rem; }
+  .cam .hud { position: absolute; left: 12px; bottom: 12px; font-family: var(--font-mono); font-size: 0.74rem; color: #e6ebe7; background: rgba(0,0,0,0.5); padding: 8px 10px; border-radius: 8px; display: grid; gap: 3px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; min-width: 0; }
+  .label { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  /* Home column */
+  .home { display: grid; gap: 14px; align-content: start; font-family: var(--font-home); font-size: calc(1.15rem * var(--home-scale)); }
+  .home .say { font-size: calc(2rem * var(--home-scale)); font-weight: 700; line-height: 1.15; min-height: 2.3em; }
+  .home .say small { display: block; font-size: 0.55em; font-weight: 400; color: var(--muted); margin-top: 6px; }
+  .home .count { display: flex; align-items: center; gap: 16px; } .home .n { font-size: calc(4.2rem * var(--home-scale)); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .dots { display: flex; gap: 10px; flex-wrap: wrap; } .dots i { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--accent); display: inline-block; } .dots i.done { background: var(--accent); }
+  .big { all: unset; cursor: pointer; display: block; width: 100%; text-align: center; padding: 16px 20px; border-radius: 16px; font-size: calc(1.4rem * var(--home-scale)); font-weight: 700; background: var(--accent); color: var(--accent-ink); }
+  .big.warm { background: var(--warm-soft); color: var(--warm); border: 2px solid var(--warm); } .big.quiet { background: var(--panel-2); color: var(--fg); border: 2px solid var(--line); } .big:disabled { opacity: 0.45; cursor: default; }
+  .home .safety { color: var(--muted); font-size: calc(0.95rem * var(--home-scale)); }
+  .prefs { display: flex; gap: 8px; flex-wrap: wrap; } .prefs button { all: unset; cursor: pointer; padding: 8px 14px; border-radius: 999px; border: 2px solid var(--line); font-weight: 700; font-size: 0.95rem; } .prefs button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  /* Clinic column */
+  .clinic { display: grid; gap: 12px; align-content: start; }
+  .rep { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; } .rep .num { font-family: var(--font-mono); font-size: 3.6rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .phase { display: flex; gap: 6px; flex-wrap: wrap; } .phase span { font-family: var(--font-mono); font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); } .phase span.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); gap: 8px; } .kv div { background: var(--panel-2); border-radius: 8px; padding: 8px 10px; } .kv .v { font-family: var(--font-mono); font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; } .kv .v small { font-size: 0.7rem; color: var(--muted); font-weight: 400; }
+  .flag { border-left: 3px solid var(--warm); background: var(--warm-soft); padding: 8px 12px; border-radius: 0 8px 8px 0; font-size: 0.9rem; } .flag.ok { border-color: var(--accent); background: var(--accent-soft); }
+  .field { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; font-size: 0.88rem; padding: 3px 0; } .field label { color: var(--muted); } .field input { font: inherit; font-family: var(--font-mono); font-size: 0.85rem; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2); color: var(--fg); width: 80px; text-align: right; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.86rem; } th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); } th { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; } td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sim { font-size: 0.8rem; color: var(--muted); }
+  [hidden] { display: none !important; }
+  @media (max-width: 900px) { .main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><i></i> SecondHands Live</div>
+    <div class="seg" role="group" aria-label="View"><button id="mode-home" aria-pressed="true">Home</button><button id="mode-clinic" aria-pressed="false">Clinic</button></div>
+    <span class="spacer"></span>
+    <span class="pill" id="rt"><span class="dot"></span> in your browser · MediaPipe Pose · <span id="delegate">loading</span> · <span id="fps">0</span> fps</span>
+  </div>
+
+  <div class="setup">
+    <select id="camera" aria-label="Camera"><option value="">Choose a camera…</option></select>
+    <button class="btn primary" id="cam-start">Open camera</button>
+    <button class="btn" id="cam-stop" disabled>Close camera</button>
+    <label class="chk"><input type="checkbox" id="mirror" checked> mirror</label>
+    <select id="exercise" aria-label="Exercise"><option value="chair">Chair stand (sit to stand)</option><option value="squat">Squat</option></select>
+    <span class="spacer"></span>
+    <span class="status" id="status">The camera and the model run on this device. Nothing is uploaded or recorded.</span>
+  </div>
+
+  <div class="main">
+    <div class="panel" style="padding:10px">
+      <div class="cam">
+        <video id="video" playsinline muted></video>
+        <canvas id="canvas" width="960" height="720" aria-label="Camera view with the detected skeleton"></canvas>
+        <div class="tag"><span class="pill" id="live-pill"><span class="dot"></span> camera off</span><span class="pill" id="infer-pill">pose — ms</span><span class="pill" id="seen-pill">no person</span></div>
+        <div class="empty" id="empty">Choose a camera and press <b>&nbsp;Open camera&nbsp;</b>.<br><span style="font-size:.9rem;opacity:.8">Stand or sit about two metres away with your whole body in view.</span></div>
+        <div class="hud" id="hud" hidden></div>
+      </div>
+    </div>
+
+    <!-- HOME column -->
+    <div class="panel home" id="home">
+      <div><div class="label" id="home-title">Today: stand up and sit down, 5 times</div>
+        <div class="say" id="say" aria-live="polite">Open the camera, then press Start.<small id="say-sub">Sit on a chair with your whole body in view.</small></div></div>
+      <div class="count"><div class="n" id="home-count">0</div><div><div class="sim" style="font-size:1rem">done</div><div class="dots" id="dots"></div></div></div>
+      <button class="big" id="home-start" disabled>Start</button>
+      <button class="big warm" id="home-break" disabled>I need a break</button>
+      <button class="big quiet" id="home-stop" disabled>Stop for today</button>
+      <div class="prefs"><button id="pref-text" aria-pressed="false">Bigger text</button><button id="pref-voice" aria-pressed="false">Read aloud</button></div>
+      <div class="safety">If you feel dizzy or unsteady, sit down and press <b>I need a break</b>.</div>
+    </div>
+
+    <!-- CLINIC column -->
+    <div class="panel clinic" id="clinic" hidden>
+      <div><div class="label" id="c-title">CS-30 · chair stand · adapted set</div>
+        <div class="rep"><div><div class="num" id="c-count">0</div><div class="sim">of <span id="c-target">5</span></div></div>
+          <div class="phase" id="c-phase"><span data-p="seated">seated</span><span data-p="rising">rising</span><span data-p="standing">standing</span><span data-p="sitting">sitting</span></div></div></div>
+      <div class="flag" id="c-flag">Open the camera to begin. Thresholds are drafts for the clinicians to set.</div>
+      <div class="kv">
+        <div><div class="label">Knee L / R</div><div class="v" id="c-knee">— <small>°</small></div></div>
+        <div><div class="label">Hip L / R</div><div class="v" id="c-hip">— <small>°</small></div></div>
+        <div><div class="label">Trunk lean</div><div class="v" id="c-lean">— <small>°</small></div></div>
+        <div><div class="label">Last rise</div><div class="v" id="c-rise">— <small>s</small></div></div>
+        <div><div class="label">Joints visible</div><div class="v" id="c-vis">— <small>/17</small></div></div>
+        <div><div class="label">Inference</div><div class="v" id="c-ms">— <small>ms</small></div></div>
+      </div>
+      <div class="controls"><button class="btn primary" id="c-start" disabled>Start set</button><button class="btn" id="c-pause" disabled>Pause</button><button class="btn danger" id="c-stop" disabled>Stop</button></div>
+      <div>
+        <div class="label" style="margin-bottom:4px">Protocol thresholds (live)</div>
+        <div class="field"><label for="t-down">Counts as down / seated when knee angle below (°)</label><input id="t-down" type="number" value="110" min="60" max="150"></div>
+        <div class="field"><label for="t-up">Counts as standing when knee angle above (°)</label><input id="t-up" type="number" value="160" min="140" max="179"></div>
+        <div class="field"><label for="t-reps">Reps this set</label><input id="t-reps" type="number" value="5" min="1" max="30"></div>
+        <div class="field"><label for="t-slow">Flag a rise slower than (s)</label><input id="t-slow" type="number" value="2.0" step="0.1" min="0.5"></div>
+        <div class="field"><label for="t-lean">Flag trunk lean above (°)</label><input id="t-lean" type="number" value="35" min="10" max="80"></div>
+      </div>
+      <div style="overflow-x:auto"><table><thead><tr><th class="num">#</th><th class="num">Rise s</th><th class="num">Down s</th><th class="num">Min knee</th><th class="num">Lean</th><th>Flag</th></tr></thead><tbody id="c-rows"><tr><td colspan="6" style="color:var(--muted)">No reps yet.</td></tr></tbody></table></div>
+      <div class="sim">Pose: MediaPipe Pose Landmarker (lite) running in this browser through WebAssembly, 33 landmarks mapped to the 17 COCO joints. On the Snapdragon laptop the same stage runs through ExecuTorch; the rules above are identical.</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { PoseLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+const $ = (id) => document.getElementById(id);
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const status = (t, bad) => { const el = $('status'); el.textContent = t; el.className = 'status' + (bad ? ' bad' : ''); };
+
+// ---------- mode ----------
+function setMode(m) { $('home').hidden = m !== 'home'; $('clinic').hidden = m !== 'clinic'; $('mode-home').setAttribute('aria-pressed', String(m === 'home')); $('mode-clinic').setAttribute('aria-pressed', String(m === 'clinic')); }
+$('mode-home').onclick = () => setMode('home'); $('mode-clinic').onclick = () => setMode('clinic');
+if (location.hash === '#clinic') setMode('clinic');
+let voice = false;
+$('pref-text').onclick = () => { const on = $('pref-text').getAttribute('aria-pressed') !== 'true'; $('pref-text').setAttribute('aria-pressed', String(on)); document.documentElement.style.setProperty('--home-scale', on ? '1.25' : '1'); };
+$('pref-voice').onclick = () => { voice = !voice; $('pref-voice').setAttribute('aria-pressed', String(voice)); if (voice) speak('Read aloud is on.'); };
+function speak(t) { if (!voice || !('speechSynthesis' in window)) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = 0.9; speechSynthesis.speak(u); } catch (e) {} }
+
+// ---------- protocol ----------
+const C = { on: false, paused: false, state: 'idle', reps: 0, downAt: 0, upAt: 0, minKnee: 180, leanPeak: 0, log: [], smooth: null };
+const P = { downDeg: 110, upDeg: 160, reps: 5, slowS: 2.0, leanDeg: 35 };
+const bind = (id, k) => { const el = $(id); const f = () => { P[k] = Number(el.value); if (k === 'reps') { $('c-target').textContent = P.reps; renderDots(); } }; el.oninput = f; f(); };
+bind('t-down', 'downDeg'); bind('t-up', 'upDeg'); bind('t-reps', 'reps'); bind('t-slow', 'slowS'); bind('t-lean', 'leanDeg');
+$('exercise').onchange = () => { const sq = $('exercise').value === 'squat'; $('t-down').value = sq ? 100 : 110; P.downDeg = Number($('t-down').value); $('home-title').textContent = sq ? 'Today: 5 squats' : 'Today: stand up and sit down, 5 times'; $('c-title').textContent = sq ? 'SQ-A · adapted squat set' : 'CS-30 · chair stand · adapted set'; const names = sq ? ['standing', 'down', 'bottom', 'up'] : ['seated', 'rising', 'standing', 'sitting']; [...document.querySelectorAll('#c-phase span')].forEach((s, i) => { s.textContent = names[i]; }); };
+
+// ---------- model ----------
+let landmarker = null;
+async function loadModel() {
+  status('Loading the pose model…');
+  const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+  const opts = (delegate) => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task', delegate }, runningMode: 'VIDEO', numPoses: 1, minPoseDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+  try { landmarker = await PoseLandmarker.createFromOptions(vision, opts('GPU')); $('delegate').textContent = 'GPU'; }
+  catch (e) { landmarker = await PoseLandmarker.createFromOptions(vision, opts('CPU')); $('delegate').textContent = 'CPU wasm'; }
+  status('Model ready. Choose a camera and open it.');
+}
+loadModel().catch((e) => { status('Could not load the pose model: ' + (e && e.message ? e.message : e), true); $('delegate').textContent = 'failed'; });
+
+// ---------- camera ----------
+const video = $('video'), canvas = $('canvas'), ctx = canvas.getContext('2d');
+let stream = null;
+async function listCameras() {
+  try {
+    const devs = await navigator.mediaDevices.enumerateDevices();
+    const cams = devs.filter((d) => d.kind === 'videoinput');
+    const sel = $('camera'); const cur = sel.value; sel.innerHTML = '';
+    cams.forEach((d, i) => { const o = document.createElement('option'); o.value = d.deviceId; o.textContent = d.label || ('Camera ' + (i + 1)); sel.appendChild(o); });
+    if (!cams.length) { const o = document.createElement('option'); o.value = ''; o.textContent = 'No camera found'; sel.appendChild(o); }
+    if (cur && [...sel.options].some((o) => o.value === cur)) sel.value = cur;
+  } catch (e) { status('Cannot list cameras: ' + e.message, true); }
+}
+async function openCamera() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { status('This browser cannot open a camera here. Use Chrome, Edge, or Safari over https.', true); return; }
+  try {
+    const id = $('camera').value;
+    stream = await navigator.mediaDevices.getUserMedia({ video: id ? { deviceId: { exact: id }, width: { ideal: 1280 }, height: { ideal: 720 } } : { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+    video.srcObject = stream; await video.play();
+    await listCameras(); // labels appear after permission
+    $('empty').hidden = true; $('hud').hidden = false; $('cam-start').disabled = true; $('cam-stop').disabled = false; $('camera').disabled = true;
+    $('live-pill').textContent = ''; $('live-pill').innerHTML = '<span class="dot"></span> LIVE'; $('live-pill').className = 'pill ok';
+    $('home-start').disabled = false; $('c-start').disabled = false;
+    status('Camera open. Step back until your whole body is in view, then press Start.');
+    homeSay('Sit on the chair and press Start when you are ready.', 'Hands on your lap, feet flat on the floor.');
+    requestAnimationFrame(loop);
+  } catch (e) { status('Camera not available: ' + (e && e.message ? e.message : e) + '. Allow camera access in the browser and try again.', true); }
+}
+function closeCamera() { if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; } video.srcObject = null; $('empty').hidden = false; $('hud').hidden = true; $('cam-start').disabled = false; $('cam-stop').disabled = true; $('camera').disabled = false; $('live-pill').innerHTML = '<span class="dot"></span> camera off'; $('live-pill').className = 'pill'; stopSet(false, true); ctx.clearRect(0, 0, canvas.width, canvas.height); status('Camera closed.'); }
+$('cam-start').onclick = openCamera; $('cam-stop').onclick = closeCamera; $('camera').onfocus = listCameras;
+listCameras(); if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) navigator.mediaDevices.addEventListener('devicechange', listCameras);
+
+// ---------- geometry ----------
+// MediaPipe 33 landmarks -> COCO-17 order used by the rest of the project.
+const MP = { nose: 0, leye: 2, reye: 5, lear: 7, rear: 8, lsho: 11, rsho: 12, lelb: 13, relb: 14, lwri: 15, rwri: 16, lhip: 23, rhip: 24, lkne: 25, rkne: 26, lank: 27, rank: 28 };
+const BONES = [['lsho', 'rsho'], ['lsho', 'lelb'], ['lelb', 'lwri'], ['rsho', 'relb'], ['relb', 'rwri'], ['lsho', 'lhip'], ['rsho', 'rhip'], ['lhip', 'rhip'], ['lhip', 'lkne'], ['lkne', 'lank'], ['rhip', 'rkne'], ['rkne', 'rank']];
+function angle(a, b, c) { const v1 = [a.x - b.x, a.y - b.y], v2 = [c.x - b.x, c.y - b.y]; const d = v1[0] * v2[0] + v1[1] * v2[1]; const n = Math.hypot(...v1) * Math.hypot(...v2); if (!n) return null; return Math.acos(Math.max(-1, Math.min(1, d / n))) * 180 / Math.PI; }
+function vis(p) { return (p.visibility ?? 1) > 0.5; }
+function measure(lm) {
+  const j = {}; for (const k in MP) j[k] = lm[MP[k]];
+  const kneeL = vis(j.lhip) && vis(j.lkne) && vis(j.lank) ? angle(j.lhip, j.lkne, j.lank) : null;
+  const kneeR = vis(j.rhip) && vis(j.rkne) && vis(j.rank) ? angle(j.rhip, j.rkne, j.rank) : null;
+  const hipL = vis(j.lsho) && vis(j.lhip) && vis(j.lkne) ? angle(j.lsho, j.lhip, j.lkne) : null;
+  const hipR = vis(j.rsho) && vis(j.rhip) && vis(j.rkne) ? angle(j.rsho, j.rhip, j.rkne) : null;
+  const sm = { x: (j.lsho.x + j.rsho.x) / 2, y: (j.lsho.y + j.rsho.y) / 2 }, hm = { x: (j.lhip.x + j.rhip.x) / 2, y: (j.lhip.y + j.rhip.y) / 2 };
+  const lean = Math.abs(Math.atan2(sm.x - hm.x, hm.y - sm.y) * 180 / Math.PI);
+  const knee = kneeL != null && kneeR != null ? (kneeL + kneeR) / 2 : (kneeL ?? kneeR);
+  const visible = Object.keys(MP).filter((k) => vis(j[k])).length;
+  return { j, kneeL, kneeR, hipL, hipR, lean, knee, visible };
+}
+
+// ---------- rep counter: knee-angle hysteresis (same rule as the engine) ----------
+function stepCounter(m, now) {
+  if (m.knee == null) return;
+  C.smooth = C.smooth == null ? m.knee : C.smooth * 0.6 + m.knee * 0.4; const k = C.smooth;
+  C.leanPeak = Math.max(C.leanPeak, m.lean);
+  const chair = $('exercise').value === 'chair';
+  if (C.state === 'idle') { C.state = k < P.downDeg ? 'seated' : 'standing'; C.leanPeak = 0; return; }
+  if (chair) {
+    if (C.state === 'seated' && k > P.downDeg + 10) { C.state = 'rising'; C.downAt = now; C.leanPeak = m.lean; }
+    else if (C.state === 'rising') { if (k > P.upDeg) { C.state = 'standing'; C.upAt = now; } else if (k < P.downDeg) { C.state = 'seated'; shallow(k); } }
+    else if (C.state === 'standing' && k < P.upDeg - 15) { C.state = 'sitting'; C.minKnee = k; }
+    else if (C.state === 'sitting') { C.minKnee = Math.min(C.minKnee, k); if (k < P.downDeg) { finishRep(now, C.upAt - C.downAt, now - C.upAt); C.state = 'seated'; } else if (k > P.upDeg) C.state = 'standing'; }
+  } else {
+    if (C.state === 'standing' && k < P.upDeg - 10) { C.state = 'down'; C.downAt = now; C.minKnee = k; C.leanPeak = m.lean; }
+    else if (C.state === 'down') { C.minKnee = Math.min(C.minKnee, k); if (k < P.downDeg) C.state = 'bottom'; else if (k > P.upDeg) { C.state = 'standing'; shallow(C.minKnee); } }
+    else if (C.state === 'bottom') { C.minKnee = Math.min(C.minKnee, k); if (k > P.downDeg + 15) { C.state = 'up'; C.upAt = now; } }
+    else if (C.state === 'up') { if (k > P.upDeg) { finishRep(now, now - C.downAt, 0); C.state = 'standing'; } }
+  }
+}
+let shallowAt = 0;
+function shallow(k) { const now = performance.now(); if (now - shallowAt < 2500) return; shallowAt = now; flag('warm', 'Not a full rep', 'knee reached ' + Math.round(k) + '°'); homeSay('Nearly. All the way up, then down.', 'Take your time.'); }
+function finishRep(now, riseMs, downMs) {
+  C.reps += 1; const rise = riseMs / 1000, down = downMs / 1000; const flags = [];
+  if (rise > P.slowS) flags.push('slow rise ' + rise.toFixed(1) + ' s'); if (C.leanPeak > P.leanDeg) flags.push('lean ' + Math.round(C.leanPeak) + '°');
+  C.log.push({ n: C.reps, rise, down, minKnee: C.minKnee, lean: C.leanPeak, flags }); C.minKnee = 180; C.leanPeak = 0;
+  flag(flags.length ? 'warm' : 'ok', 'Rep ' + C.reps + (flags.length ? ': ' + flags.join(', ') : ' clean'), 'rise ' + rise.toFixed(2) + ' s');
+  const left = P.reps - C.reps; const praise = ['Lovely.', 'Well done.', 'Good.', 'That was a good one.', 'Nice and steady.'][C.reps % 5];
+  if (left > 0) { homeSay(praise + ' ' + left + ' to go.', C.leanPeak > P.leanDeg ? 'Keep your chest up as you rise.' : 'Rest a moment, then go again.'); speak(praise + ' ' + left + ' to go.'); }
+  render(); if (C.reps >= P.reps) stopSet(true);
+}
+function flag(kind, t, s) { const el = $('c-flag'); el.className = 'flag ' + (kind === 'ok' ? 'ok' : ''); el.textContent = ''; const b = document.createElement('b'); b.textContent = t + ' '; el.append(b, document.createTextNode(s)); }
+function homeSay(t, s) { $('say').childNodes[0].nodeValue = t; $('say-sub').textContent = s; }
+function renderDots() { const d = $('dots'); d.innerHTML = ''; for (let i = 0; i < P.reps; i++) { const el = document.createElement('i'); if (i < C.reps) el.className = 'done'; d.appendChild(el); } }
+function render() {
+  $('home-count').textContent = C.reps; $('c-count').textContent = C.reps; renderDots();
+  const last = C.log[C.log.length - 1]; $('c-rise').innerHTML = (last ? last.rise.toFixed(2) : '—') + ' <small>s</small>';
+  const rows = $('c-rows'); rows.innerHTML = ''; if (!C.log.length) rows.innerHTML = '<tr><td colspan="6" style="color:var(--muted)">No reps yet.</td></tr>';
+  C.log.slice().reverse().forEach((r) => { const tr = document.createElement('tr'); [r.n, r.rise.toFixed(2), r.down.toFixed(2), Math.round(r.minKnee), Math.round(r.lean), r.flags.join(', ') || 'clean'].forEach((v, i) => { const td = document.createElement('td'); if (i < 5) td.className = 'num'; td.textContent = v; tr.appendChild(td); }); rows.appendChild(tr); });
+  [...document.querySelectorAll('#c-phase span')].forEach((s, i) => s.classList.toggle('on', i === ['seated', 'rising', 'standing', 'sitting'].indexOf(C.state) || i === ['standing', 'down', 'bottom', 'up'].indexOf(C.state)));
+}
+function startSet() { Object.assign(C, { on: true, paused: false, state: 'idle', reps: 0, log: [], minKnee: 180, leanPeak: 0, smooth: null }); $('home-start').disabled = true; $('home-break').disabled = false; $('home-stop').disabled = false; $('c-start').disabled = true; $('c-pause').disabled = false; $('c-stop').disabled = false; const chair = $('exercise').value === 'chair'; homeSay(chair ? 'Stand up slowly, all the way, then sit back down.' : 'Squat down, then stand up tall.', chair ? 'Use the arms of the chair if you need to.' : 'Keep your heels on the floor.'); speak(chair ? 'Stand up slowly, all the way, then sit back down.' : 'Squat down, then stand up tall.'); flag('ok', 'Set started', 'counting from the knee angle'); render(); }
+function pauseSet() { C.paused = !C.paused; $('c-pause').textContent = C.paused ? 'Resume' : 'Pause'; $('home-break').textContent = C.paused ? 'I am ready again' : 'I need a break'; homeSay(C.paused ? 'Take your time. Breathe.' : 'Ready when you are.', ''); }
+function stopSet(done, silent) { if (!C.on && !done) { return; } C.on = false; C.paused = false; $('home-start').disabled = !stream; $('home-start').textContent = 'Start again'; $('home-break').disabled = true; $('home-break').textContent = 'I need a break'; $('home-stop').disabled = true; $('c-start').disabled = !stream; $('c-start').textContent = 'Start next set'; $('c-pause').disabled = true; $('c-pause').textContent = 'Pause'; $('c-stop').disabled = true; if (!silent) { homeSay(done ? 'All done. Well done!' : 'Saved. See you next time.', done ? 'Your clinician will see this session.' : ''); speak(done ? 'All done. Well done.' : 'Saved.'); flag('ok', done ? 'Set complete' : 'Set stopped', C.reps + ' reps · nothing recorded or uploaded'); } render(); }
+$('home-start').onclick = startSet; $('home-break').onclick = pauseSet; $('home-stop').onclick = () => stopSet(false); $('c-start').onclick = startSet; $('c-pause').onclick = pauseSet; $('c-stop').onclick = () => stopSet(false);
+renderDots();
+
+// ---------- loop ----------
+let lastVideoTime = -1, fpsN = 0, fpsAt = performance.now(), lastResult = null, lastMs = 0;
+function loop() {
+  if (!stream) return;
+  const mirror = $('mirror').checked;
+  if (video.videoWidth && (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight)) { canvas.width = video.videoWidth; canvas.height = video.videoHeight; }
+  const W = canvas.width, H = canvas.height;
+  ctx.save(); if (mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.drawImage(video, 0, 0, W, H); ctx.restore();
+  if (landmarker && video.currentTime !== lastVideoTime) {
+    lastVideoTime = video.currentTime; const t0 = performance.now();
+    try { lastResult = landmarker.detectForVideo(video, t0); } catch (e) { lastResult = null; }
+    lastMs = performance.now() - t0;
+  }
+  const lm = lastResult && lastResult.landmarks && lastResult.landmarks[0];
+  const X = (x) => (mirror ? 1 - x : x) * W, Y = (y) => y * H;
+  if (lm) {
+    const m = measure(lm); const accent = css('--accent') || '#1f7a5c';
+    if (C.on && !C.paused) stepCounter(m, performance.now());
+    const showSkel = !$('clinic').hidden || true;
+    if (showSkel) {
+      ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = $('home').hidden ? accent : 'rgba(111,202,167,0.9)';
+      BONES.forEach(([a, b]) => { const p = m.j[a], q = m.j[b]; if (!vis(p) || !vis(q)) return; ctx.beginPath(); ctx.moveTo(X(p.x), Y(p.y)); ctx.lineTo(X(q.x), Y(q.y)); ctx.stroke(); });
+      Object.keys(MP).forEach((k) => { const p = m.j[k]; if (!vis(p)) return; ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), 6, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = accent; ctx.stroke(); });
+      if ($('home').hidden) { // Clinic: angle labels
+        ctx.font = '600 16px "IBM Plex Mono", monospace'; ctx.fillStyle = '#fff'; ctx.strokeStyle = 'rgba(0,0,0,0.7)'; ctx.lineWidth = 3;
+        const lab = (p, t) => { if (!vis(p)) return; ctx.strokeText(t, X(p.x) + 12, Y(p.y) - 8); ctx.fillText(t, X(p.x) + 12, Y(p.y) - 8); };
+        if (m.kneeL != null) lab(m.j.lkne, Math.round(m.kneeL) + '°'); if (m.kneeR != null) lab(m.j.rkne, Math.round(m.kneeR) + '°'); lab(m.j.lsho, 'lean ' + Math.round(m.lean) + '°');
+      }
+    }
+    $('seen-pill').textContent = m.visible + '/17 joints'; $('seen-pill').className = 'pill ' + (m.visible >= 13 ? 'ok' : '');
+    $('hud').innerHTML = '<span>knee L ' + (m.kneeL == null ? '—' : Math.round(m.kneeL) + '°') + ' · R ' + (m.kneeR == null ? '—' : Math.round(m.kneeR) + '°') + '</span><span>trunk lean ' + Math.round(m.lean) + '° · state ' + C.state + '</span>';
+    $('c-knee').innerHTML = (m.kneeL == null ? '—' : Math.round(m.kneeL)) + ' / ' + (m.kneeR == null ? '—' : Math.round(m.kneeR)) + ' <small>°</small>';
+    $('c-hip').innerHTML = (m.hipL == null ? '—' : Math.round(m.hipL)) + ' / ' + (m.hipR == null ? '—' : Math.round(m.hipR)) + ' <small>°</small>';
+    $('c-lean').innerHTML = Math.round(m.lean) + ' <small>°</small>'; $('c-vis').innerHTML = m.visible + ' <small>/17</small>';
+    if (m.visible < 13 && C.on) homeSay('Step back a little so I can see all of you.', 'Your legs need to be in the picture.');
+  } else { $('seen-pill').textContent = 'no person'; $('seen-pill').className = 'pill'; }
+  $('infer-pill').textContent = 'pose ' + lastMs.toFixed(0) + ' ms'; $('c-ms').innerHTML = lastMs.toFixed(0) + ' <small>ms</small>';
+  [...document.querySelectorAll('#c-phase span')].forEach((s, i) => s.classList.toggle('on', i === ['seated', 'rising', 'standing', 'sitting'].indexOf(C.state) || i === ['standing', 'down', 'bottom', 'up'].indexOf(C.state)));
+  fpsN++; if (performance.now() - fpsAt > 1000) { $('fps').textContent = fpsN; fpsN = 0; fpsAt = performance.now(); }
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>

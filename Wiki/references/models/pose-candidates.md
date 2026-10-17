@@ -44,7 +44,7 @@ Ask for these back:
 - A profiler or ETDump trace showing which operators ran on the HTP, and the warmed per-inference latency, so the [Compute evidence requirements](../../hackathon-compute.md#compute-deployment-and-verification) are met.
 - A list of any operators that fell back to the CPU; a model that mostly falls back is not an NPU result.
 
-Record the outcome on this page and link it from [the plan](../../plan.md#movement-tracker).
+Record the outcome on this page and link it from [the plan](../../plan.md#dependencies-and-order).
 
 ## Questions
 
