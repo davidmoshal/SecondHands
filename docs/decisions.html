@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MotionVitals Decision Board</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one reading column; comparison table, adopt list, then one card per decision with options, a recommendation, and live votes. */
+  :root {
+    --bg: #f6f7f4; --surface: #ffffff; --surface-2: #f0f2ee; --fg: #1b2420; --muted: #5c6a63; --line: #d5dcd6;
+    --accent: #0f6e63; --accent-soft: #d9ece8; --accent-ink: #ffffff; --warn: #a35a00; --warn-soft: #f6e8d2; --bad: #a3272b; --bad-soft: #f6dcdc;
+    --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; --font-mono: "IBM Plex Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #141917; --surface: #1c2320; --surface-2: #232b27; --fg: #e6ebe7; --muted: #9fb0a7; --line: #2f3a35; --accent: #5fc4b4; --accent-soft: #1b3b36; --accent-ink: #0f1512; --warn: #e3a44a; --warn-soft: #3a2c15; --bad: #ef8a8d; --bad-soft: #3d1f20; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #141917; --surface: #1c2320; --surface-2: #232b27; --fg: #e6ebe7; --muted: #9fb0a7; --line: #2f3a35; --accent: #5fc4b4; --accent-soft: #1b3b36; --accent-ink: #0f1512; --warn: #e3a44a; --warn-soft: #3a2c15; --bad: #ef8a8d; --bad-soft: #3d1f20; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; }
+  main { max-width: 960px; margin: 0 auto; display: grid; gap: 40px; }
+  h1, h2, h3 { text-wrap: balance; line-height: 1.2; margin: 0; } h1 { font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 600; } h2 { font-size: 1.3rem; font-weight: 600; } h3 { font-size: 1.05rem; font-weight: 600; }
+  p { margin: 0; max-width: 70ch; } .lede { color: var(--muted); font-size: 1.05rem; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  header, section { display: grid; gap: 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; } th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); } th { font-weight: 600; color: var(--muted); font-size: 0.76rem; letter-spacing: 0.04em; text-transform: uppercase; } td:first-child { font-weight: 500; }
+  .pill { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; padding: 1px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; } .pill.warn { background: var(--warn-soft); color: var(--warn); } .pill.plain { background: transparent; border: 1px solid var(--line); color: var(--muted); } .pill.bad { background: var(--bad-soft); color: var(--bad); }
+  ul, ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; max-width: 72ch; }
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+  .note { border-left: 3px solid var(--warn); padding: 8px 12px; background: var(--warn-soft); border-radius: 0 6px 6px 0; font-size: 0.95rem; max-width: 72ch; }
+  .decision { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 16px 18px; display: grid; gap: 12px; }
+  .decision header { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .options { display: grid; gap: 8px; }
+  .opt { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); }
+  .opt .key { font-family: var(--font-mono); font-weight: 600; width: 1.6em; }
+  .opt .txt { min-width: 0; font-size: 0.95rem; } .opt .txt small { display: block; color: var(--muted); margin-top: 2px; }
+  .opt button { all: unset; cursor: pointer; font-weight: 600; font-size: 0.85rem; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); white-space: nowrap; }
+  .opt button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .opt button:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .opt.rec { border-color: var(--accent); }
+  .tally { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 0.85rem; color: var(--muted); }
+  .tally .who { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px 2px 2px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--fg); }
+  .tally img { width: 20px; height: 20px; border-radius: 50%; }
+  .tally .k { font-family: var(--font-mono); font-weight: 600; color: var(--accent); }
+  .reco { font-size: 0.92rem; color: var(--muted); } .reco b { color: var(--fg); }
+  textarea { width: 100%; min-height: 56px; font: inherit; font-size: 0.92rem; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); color: var(--fg); resize: vertical; }
+  .status { font-size: 0.85rem; color: var(--muted); }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; } .cols > div { min-width: 0; display: grid; gap: 8px; align-content: start; }
+  footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 14px; } a { color: var(--accent); }
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+
+<main>
+  <header>
+    <div class="eyebrow">SecondHands · 17 Oct 2026, evening · for the whole team</div>
+    <h1>MotionVitals Decision Board</h1>
+    <p class="lede">Szvier added a planning package called MotionVitals AI to the repository: a supervised Five-Times Sit-to-Stand test scored by a camera and a local ExecuTorch model, aimed at pharmaceutical trials. It describes the same engine we are building for a different buyer. This page lays the two side by side, lists what to adopt tonight, and asks the team to pick on seven points. Tap an option to vote; everyone sees the tally live.</p>
+    <p class="status" id="status">Loading votes…</p>
+    <p class="status">Vote with one comment on <a href="https://github.com/SecondHands-AI/SecondHands/issues/33">issue #33</a>: for example <code>D1 C, D2 A, D3 A, D4 C, D5 A, D6 C, D7 B</code>.</p>
+  </header>
+
+  <section>
+    <div class="eyebrow">1 · Side by side</div>
+    <h2>Where the package and our build agree, and where they differ</h2>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Topic</th><th>MotionVitals package</th><th>SecondHands today</th><th>Read</th></tr></thead>
+        <tbody>
+          <tr><td>Pipeline</td><td>Frames, local ExecuTorch pose model, event detection, deterministic count and time, quality control, review, export</td><td>Identical layers; YOLO11n-pose already runs through ExecuTorch on the CPU; rules and screens prototyped</td><td><span class="pill">same engine</span></td></tr>
+          <tr><td>Test</td><td>5xSTS: start seated, time from cue to the fifth full stand</td><td>CS-30: stands counted in 30 seconds, plus single-leg stance; same counter with a different stop rule</td><td><span class="pill">one rule apart</span></td></tr>
+          <tr><td>Measurement</td><td>Hip vertical displacement normalized to body scale, knee and hip angles, hysteresis, dwell time</td><td>Leg drop in torso lengths plus 3D knee angles, hysteresis; shipped today after the frontal-camera finding</td><td><span class="pill">same</span></td></tr>
+          <tr><td>Buyer and story</td><td>Sponsor or CRO; cancer cachexia; functional evidence beside biomarkers</td><td>Clinicians, rehabilitation, home follow-up, field settings, low-cost reach</td><td><span class="pill warn">decide</span></td></tr>
+          <tr><td>Model</td><td>ViTPose-S proposed as a feasibility spike, unverified</td><td>YOLO11n-pose verified on CPU; RTMPose in conversion with Qualcomm for the NPU</td><td><span class="pill warn">decide</span></td></tr>
+          <tr><td>Hardware</td><td>Assumes an Astra 2; depth optional</td><td>Femto Bolt bridge works; RealSense colour; depth optional</td><td><span class="pill">no conflict</span></td></tr>
+          <tr><td>Failure handling</td><td>Explicit incomplete, interrupted, invalid outcomes; null time with a reason; attempts preserved; a deliberate occlusion demo</td><td>Flags per rep; no explicit attempt states or occlusion demo yet</td><td><span class="pill warn">adopt</span></td></tr>
+          <tr><td>Evidence bar</td><td>Three end-to-end runs, ten held-out clips within 0.5 s, p50 and p95 latency with warm-up, an offline run with networking disabled</td><td>Benchmark table planned; no clip-count or offline-run target</td><td><span class="pill warn">adopt</span></td></tr>
+          <tr><td>Record schema</td><td>Versioned record with attempt lineage, QC status, source labels, model hash, backend</td><td>Three WebSocket messages and a SQLite plan; schema not yet fixed</td><td><span class="pill warn">adopt</span></td></tr>
+          <tr><td>Emulation honesty</td><td>An emulated x64 process must be labelled and does not prove native or NPU execution</td><td>Tier 0 is emulated x64; the badge must say so</td><td><span class="pill">agreed</span></td></tr>
+          <tr><td>Status</td><td>Planning only; nothing implemented; two referenced files (04 pitch, 05 roadmap) not uploaded; a 211 MB demo video not reviewed</td><td>Live browser demo, Pages site, plan, briefs, issues #19 to #26</td><td><span class="pill plain">complementary</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">2 · Adopt tonight, no vote needed</div>
+    <h2>Parts of the package that are simply better than what we had</h2>
+    <ul>
+      <li><b>Protocol precision</b> for sit-to-stand: cue-to-fifth-stand timing, event time at the first qualifying frame, the timer never pauses on tracking loss, explicit INCOMPLETE, INTERRUPTED, INVALID outcomes with a null time and a reason, every attempt preserved. Goes into briefs D1 and D2 and the protocol JSON.</li>
+      <li><b>The deliberate failure demo</b>: occlude tracking, show the flag, withhold the time. Becomes a required demo step in Workstream H.</li>
+      <li><b>The evidence bar</b>: three consecutive end-to-end runs, ten held-out clips with independent annotation, exact counts and time within 0.5 s, p50 and p95 latency with warm-up and sample counts, an assessment and export with networking disabled. Becomes Workstream G acceptance.</li>
+      <li><b>The record schema</b> (`schema_version`, attempt, status, QC flags, data source, model hash, backend, software version). Goes into brief E1's storage and export.</li>
+      <li><b>Claim controls</b> from the regulatory document: allowed today, allowed after testing, never. Becomes the rule for every sentence in the presentation.</li>
+    </ul>
+    <p class="note">The package's own ROI model returns a negative return at its default inputs (about minus 64 percent). Leave it out of the pitch unless the inputs are defended. The synthetic biomarker context is easy to misread as evidence; the package itself says keep it brief and after the live demo.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">3 · Decisions</div>
+    <h2>Seven points for the team to settle</h2>
+    <p>Each card shows the options, a recommendation, and the votes so far. You can change your vote; only the latest counts. Add a short note at the bottom if your reasoning matters to others.</p>
+    <div id="decisions" style="display:grid;gap:16px"></div>
+    <div class="decision">
+      <header><h3>Your note to the team</h3><span class="pill plain" id="note-state">optional</span></header>
+      <textarea id="note" placeholder="One or two lines: what you would change, what you can own tonight, what you need from someone else."></textarea>
+      <div class="tally" id="notes"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">4 · Open items for Szvier</div>
+    <h2>Questions the package raises</h2>
+    <ul>
+      <li>The start file lists <code>04_HACKATHON_PITCH.md</code> and <code>05_COMMERCIALIZATION_ROADMAP.md</code>; neither is in the upload. Are they coming?</li>
+      <li>Who is the clinical lead who freezes the 5xSTS convention and annotates the reference clips? The package leaves every owner unassigned.</li>
+      <li>The 211 MB <code>IMG_4572.mov</code> with organiser demo requirements was never reviewed. Can someone watch it tonight and write down the demo length and format rules?</li>
+      <li>Is "MotionVitals AI" the submission name, a product name under SecondHands, or the trial-endpoint module? Decision 6 below.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="eyebrow">5 · If the votes go as recommended</div>
+    <h2>What changes in the plan</h2>
+    <div class="cols">
+      <div><h3>Added</h3><ul><li>Protocol 5XSTS-01 beside CS-30, with the package's convention</li><li>Failure demo and offline run as acceptance items</li><li>Record schema in storage and export</li><li>A reconciliation page in the Wiki that maps the package onto the plan, plus index and source-record entries</li></ul></div>
+      <div><h3>Unchanged</h3><ul><li>Model path: YOLO on CPU today, RTMPose on the NPU with Qualcomm</li><li>Workstreams A to I and issues #19 to #26</li><li>Home and Clinic views, with "supervised" stated</li><li>The live camera page as the interaction reference</li></ul></div>
+      <div><h3>Dropped or parked</h3><ul><li>ViTPose spike</li><li>ROI figures in the pitch</li><li>Biomarker context beyond one backup slide</li></ul></div>
+    </div>
+  </section>
+
+  <footer>Source: <code>Wiki/MotionVitals AI/</code> on <code>main</code> (PR #30), read in full on 17 Oct 2026 evening. Plan and briefs: <code>Wiki/plan.md</code>, <code>Wiki/design/implementation-briefs.md</code>. Votes are stored with this page and visible to everyone who can open it; names come from your claude.ai profile.</footer>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const DECISIONS = [
+    { id: 'd1', title: 'Positioning for the pitch', rec: 'C', options: [
+      ['A', 'Trial endpoint first', 'MotionVitals framing: sponsor or CRO buyer, supervised 5xSTS, cancer cachexia story. Sharpest for "use case and impact".'],
+      ['B', 'Broad clinical platform', 'SecondHands framing: clinic, rehabilitation, home follow-up, field use, low-cost reach. Wider but softer.'],
+      ['C', 'One engine, first product is the trial endpoint', 'Lead with the MotionVitals story and demo; close with the platform reach slide. Both documents stay true.']],
+      why: 'Judges reward a specific user with a specific problem. The reach slide keeps the bigger vision without diluting the demo.' },
+    { id: 'd2', title: 'Primary protocol for the demonstration', rec: 'A', options: [
+      ['A', '5xSTS, cue to fifth stand', 'The package\'s convention. One number, easy to time against a stopwatch, the clearest failure cases.'],
+      ['B', 'CS-30, stands in 30 seconds', 'Our current default. Count-based; a rep near the buzzer is ambiguous.'],
+      ['C', 'Both, 5xSTS primary', 'Same counter, two stop rules. Costs a second protocol file and a second rehearsal.']],
+      why: 'The engine supports both. Demo one, mention the other.' },
+    { id: 'd3', title: 'Pose model', rec: 'A', options: [
+      ['A', 'Keep YOLO11n-pose on CPU, RTMPose on the NPU with Qualcomm', 'Verified export today; RTMPose handoff already written.'],
+      ['B', 'Switch to ViTPose-S as the package proposes', 'Heavier transformer; unverified export; no NPU evidence; restarts the model work.']],
+      why: 'The package itself calls the model an engineering decision to verify. Ours is verified.' },
+    { id: 'd4', title: 'The participant-facing Home view', rec: 'C', options: [
+      ['A', 'Keep it as built', 'Large type, one instruction at a time, no numbers.'],
+      ['B', 'Drop it this weekend', 'Coordinator Clinic view only, as the package describes.'],
+      ['C', 'Keep it, labelled as the participant screen in a supervised session', 'Resolves the package\'s point that home use needs separate evidence without losing the accessibility story.']],
+      why: 'The package wants supervised site use first. The Home view is a screen, not an unsupervised product, if we say so.' },
+    { id: 'd5', title: 'Evidence bar for the demo', rec: 'A', options: [
+      ['A', 'Adopt the package\'s definition of success', 'Three end-to-end runs, failure demo, ten held-out clips within 0.5 s, p50 and p95 with warm-up, offline run with networking disabled.'],
+      ['B', 'Keep the lighter current plan', 'Benchmark table and one validated session per protocol.']],
+      why: 'Fifteen points sit on on-device efficiency and ten on documentation. The stricter bar is what earns them.' },
+    { id: 'd6', title: 'Name on the submission', rec: 'C', options: [
+      ['A', 'MotionVitals AI', 'The package\'s name; matches the trial-endpoint story.'],
+      ['B', 'SecondHands', 'The repository, organisation, and Pages site already carry it.'],
+      ['C', 'SecondHands, with MotionVitals as the trial-endpoint product', 'Platform name on the repo, product name on the demo.']],
+      why: 'Renaming the organisation again tonight costs time; a product name under the platform costs nothing.' },
+    { id: 'd7', title: 'Synthetic biomarker and longitudinal context', rec: 'B', options: [
+      ['A', 'One labelled backup slide after the demo', 'Synthetic GDF-15 and visit history, clearly marked synthetic.'],
+      ['B', 'Omit this weekend', 'Baseline-versus-latest from our own sessions is enough context.']],
+      why: 'Every minute of the pitch should show something that ran. Synthetic data invites the wrong question.' },
+  ];
+
+  let db = null, user = null, myId = null, canWrite = null, mine = { note: '' }, all = new Map(), profilesCache = {};
+  const root = $('decisions');
+
+  function build() {
+    root.innerHTML = '';
+    DECISIONS.forEach((d) => {
+      const card = document.createElement('div'); card.className = 'decision'; card.id = 'card-' + d.id;
+      const head = document.createElement('header'); const h = document.createElement('h3'); h.textContent = d.title; head.appendChild(h);
+      const pill = document.createElement('span'); pill.className = 'pill'; pill.textContent = 'recommended: ' + d.rec; head.appendChild(pill); card.appendChild(head);
+      const opts = document.createElement('div'); opts.className = 'options';
+      d.options.forEach(([k, label, detail]) => {
+        const o = document.createElement('div'); o.className = 'opt' + (k === d.rec ? ' rec' : '');
+        const key = document.createElement('span'); key.className = 'key'; key.textContent = k;
+        const txt = document.createElement('div'); txt.className = 'txt'; txt.textContent = label; const sm = document.createElement('small'); sm.textContent = detail; txt.appendChild(sm);
+        const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Vote ' + k; b.dataset.d = d.id; b.dataset.k = k; b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => vote(d.id, k));
+        o.append(key, txt, b); opts.appendChild(o);
+      });
+      card.appendChild(opts);
+      const why = document.createElement('p'); why.className = 'reco'; const bb = document.createElement('b'); bb.textContent = 'Why ' + d.rec + ': '; why.append(bb, document.createTextNode(d.why)); card.appendChild(why);
+      const tally = document.createElement('div'); tally.className = 'tally'; tally.id = 'tally-' + d.id; tally.textContent = 'No votes yet.'; card.appendChild(tally);
+      root.appendChild(card);
+    });
+  }
+  build();
+
+  async function render() {
+    const ids = [...all.keys()];
+    if (user && ids.length) { try { profilesCache = await user.profiles(ids); } catch (e) { profilesCache = {}; } }
+    DECISIONS.forEach((d) => {
+      const t = $('tally-' + d.id); t.innerHTML = '';
+      const byOpt = {}; ids.forEach((id) => { const v = all.get(id)[d.id]; if (v) (byOpt[v] = byOpt[v] || []).push(id); });
+      const keys = Object.keys(byOpt).sort();
+      if (!keys.length) { t.textContent = 'No votes yet.'; } else {
+        keys.forEach((k) => { const s = document.createElement('span'); s.className = 'k'; s.textContent = k + ' × ' + byOpt[k].length; t.appendChild(s); byOpt[k].forEach((id) => { const p = profilesCache[id]; const w = document.createElement('span'); w.className = 'who'; if (p) { const img = document.createElement('img'); img.src = p.avatarUrl; img.alt = ''; w.appendChild(img); } w.appendChild(document.createTextNode((p && p.name) || (id === myId ? 'you' : 'Someone'))); t.appendChild(w); }); });
+      }
+      document.querySelectorAll('#card-' + d.id + ' button').forEach((b) => b.setAttribute('aria-pressed', String(mine[d.id] === b.dataset.k)));
+    });
+    const notes = $('notes'); notes.innerHTML = '';
+    ids.forEach((id) => { const n = all.get(id).note; if (!n) return; const p = profilesCache[id]; const w = document.createElement('span'); w.className = 'who'; w.style.whiteSpace = 'normal'; w.appendChild(document.createTextNode(((p && p.name) || (id === myId ? 'you' : 'Someone')) + ': ' + n)); notes.appendChild(w); });
+  }
+
+  let writing = Promise.resolve();
+  function save() {
+    if (!db || !myId) return;
+    const body = Object.assign({}, mine, { updatedAt: new Date().toISOString() });
+    writing = writing.then(() => db.doc('votes/' + myId).set(body)).then(() => { $('status').textContent = 'Saved. Votes update live for everyone.'; }).catch((e) => { if (e && e.code === 'invalid_argument') { canWrite = false; $('status').textContent = 'You can see the votes but not cast one from this account level.'; } else { $('status').textContent = 'Could not save right now; try again in a moment.'; } });
+  }
+  function vote(d, k) {
+    if (!db || !myId) { $('status').textContent = 'Voting needs a signed-in claude.ai viewer with access to this page.'; return; }
+    if (canWrite === false) return;
+    mine[d] = mine[d] === k ? '' : k; save(); render();
+  }
+  let noteTimer = null;
+  $('note').addEventListener('input', () => { clearTimeout(noteTimer); $('note-state').textContent = 'saving…'; noteTimer = setTimeout(() => { mine.note = $('note').value.slice(0, 400); save(); $('note-state').textContent = 'saved'; }, 900); });
+
+  (async () => {
+    user = await window.claude?.use?.('user');
+    db = await window.claude?.use?.('db');
+    if (!db) { $('status').textContent = 'This is the read-only copy. Vote with one comment on GitHub issue #33 (https://github.com/SecondHands-AI/SecondHands/issues/33), or use the live tally on claude.ai if you have access.'; return; }
+    myId = user ? await user.id() : null;
+    if (user) { try { canWrite = await user.can('data.write'); } catch (e) { canWrite = null; } }
+    if (!myId) { $('status').textContent = 'You can read the votes; sign in to cast one.'; }
+    if (myId) { try { const snap = await db.doc('votes/' + myId).get(); if (snap.exists) { mine = Object.assign({ note: '' }, snap.data()); $('note').value = mine.note || ''; } } catch (e) {} }
+    db.collection('votes').onSnapshot((qs) => { all = new Map(); qs.docs.forEach((doc) => { if (doc.exists) all.set(doc.id, doc.data()); }); if (myId && all.has(myId)) { const m = all.get(myId); DECISIONS.forEach((d) => { if (m[d.id] !== undefined) mine[d.id] = m[d.id]; }); } render(); if (!qs.metadata.hasPendingWrites) $('status').textContent = ids(qs) + ' voting so far. Tap an option to vote; tap again to clear.'; }, (e) => { $('status').textContent = 'Live votes stopped updating (' + (e && e.code) + '). Reload to reconnect.'; });
+    function ids(qs) { const n = qs.docs.filter((x) => x.exists).length; return n === 0 ? 'Nobody' : n === 1 ? 'One person' : n + ' people'; }
+  })();
+})();
+</script>
+
+</body>
+</html>
