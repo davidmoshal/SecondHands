@@ -1,0 +1,21 @@
+{
+  "is_synthetic": true,
+  "purpose": "Illustrative integration fixture only; not patient data, model output, or efficacy evidence",
+  "study_id": "SYNTH-STUDY-01",
+  "participant_id": "SYNTH-P001",
+  "treatment_assignment": "BLINDED_DEMO",
+  "observations": [
+    {"visit_id":"BASELINE","measure":"5xSTS_completion_time","value":16.0,"unit":"s","qc":"pass","source":"synthetic_function_fixture","protocol_id":"DEMO-CUE-TO-FIFTH-STAND-v1"},
+    {"visit_id":"WEEK_04","measure":"5xSTS_completion_time","value":14.2,"unit":"s","qc":"pass","source":"synthetic_function_fixture","protocol_id":"DEMO-CUE-TO-FIFTH-STAND-v1"},
+    {"visit_id":"WEEK_08","measure":"5xSTS_completion_time","value":null,"unit":"s","qc":"fail","source":"synthetic_function_fixture","protocol_id":"DEMO-CUE-TO-FIFTH-STAND-v1","missing_reason":"simulated_tracking_loss"},
+    {"visit_id":"BASELINE","measure":"GDF15","value":2400,"unit":"pg/mL","source":"synthetic_imported_lab"},
+    {"visit_id":"WEEK_04","measure":"GDF15","value":2100,"unit":"pg/mL","source":"synthetic_imported_lab"},
+    {"visit_id":"WEEK_08","measure":"GDF15","value":2050,"unit":"pg/mL","source":"synthetic_imported_lab"},
+    {"visit_id":"BASELINE","measure":"lean_body_mass","value":44.0,"unit":"kg","source":"synthetic_imported_body_composition","modality":"illustrative_DXA"},
+    {"visit_id":"WEEK_04","measure":"lean_body_mass","value":44.5,"unit":"kg","source":"synthetic_imported_body_composition","modality":"illustrative_DXA"},
+    {"visit_id":"WEEK_08","measure":"lean_body_mass","value":44.8,"unit":"kg","source":"synthetic_imported_body_composition","modality":"illustrative_DXA"},
+    {"visit_id":"BASELINE","measure":"illustrative_self_reported_physical_function","value":5,"unit":"demo_0_to_10","source":"synthetic_imported_PRO","instrument":"invented_demo_scale_NOT_validated"},
+    {"visit_id":"WEEK_04","measure":"illustrative_self_reported_physical_function","value":6,"unit":"demo_0_to_10","source":"synthetic_imported_PRO","instrument":"invented_demo_scale_NOT_validated"},
+    {"visit_id":"WEEK_08","measure":"illustrative_self_reported_physical_function","value":6,"unit":"demo_0_to_10","source":"synthetic_imported_PRO","instrument":"invented_demo_scale_NOT_validated"}
+  ]
+}

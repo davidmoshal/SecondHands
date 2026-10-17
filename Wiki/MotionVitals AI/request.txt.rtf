@@ -1,0 +1,862 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2761
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 PROJECT: MOTIONVITALS AI\
+Turning Physical Function into Actionable Clinical Evidence\
+\
+CONTEXT\
+\
+We are developing MotionVitals AI for the 2026 ExecuTorch\
+Hackathon, sponsored by Qualcomm, Meta, GitHub, and others.\
+\
+This project should be presented as an early-stage healthcare\
+technology company with a credible commercialization strategy,\
+not simply a computer vision demonstration.\
+\
+We need to produce four interconnected deliverables:\
+\
+1. Comprehensive product and business concept\
+2. Investor-style / hackathon pitch deck\
+3. Technical product and engineering specifications\
+4. Market adoption, validation, and commercialization roadmap\
+\
+All four must tell one consistent story.\
+\
+Use the materials I provide as background, consolidate\
+overlapping concepts, and identify contradictions or unsupported\
+claims.\
+\
+Do not invent clinical evidence, performance results, regulatory\
+approvals, market sizes, competitor prices, or cost savings.\
+\
+Use credible public sources and maintain a reference list.\
+\
+--------------------------------------------------\
+1. PRODUCT DEFINITION AND BUSINESS PROBLEM\
+--------------------------------------------------\
+\
+Create a comprehensive project document.\
+\
+Working name:\
+MotionVitals AI\
+\
+Tagline:\
+Turning Physical Function into Actionable Clinical Evidence\
+\
+CORE BUSINESS PROBLEM\
+\
+In pharmaceutical development, demonstrating a biological\
+effect does not necessarily demonstrate a meaningful\
+functional benefit to patients.\
+\
+Sponsors use physical performance assessments, clinical\
+outcome assessments, patient-reported outcomes, imaging,\
+and biological biomarkers to characterize treatment effects.\
+\
+However, some physical-function assessments require trained\
+personnel, manual timing or scoring, standardized equipment,\
+and repeated visits.\
+\
+Potential challenges include:\
+\
+- Variability across assessors and clinical sites\
+- Staff time required for test administration and scoring\
+- Incomplete or inconsistent measurements\
+- Difficulty comparing longitudinal assessments\
+- Limited integration of functional data with biomarkers\
+- Cost and operational burden of endpoint collection\
+- Limited availability of assessments outside research sites\
+\
+These are potential problems to validate, not universal\
+limitations of existing methods.\
+\
+OUR PROPOSED SOLUTION\
+\
+Develop an AI-powered platform that converts standardized\
+physical performance assessments into objective,\
+reproducible digital clinical measurements.\
+\
+The platform uses camera-based movement analysis and\
+on-device inference to automate relevant portions of\
+functional assessments.\
+\
+Initial supported assessment:\
+\
+Five-Times Sit-to-Stand (5xSTS).\
+\
+Future assessments may include:\
+\
+- 30-second chair stand\
+- Timed Up and Go\
+- Gait speed\
+- Short Physical Performance Battery\
+- Selected disease-specific motor assessments\
+\
+The initial system should produce:\
+\
+- Repetition count\
+- Total completion time\
+- Individual movement transition times, if feasible\
+- Measurement quality indicators\
+- Structured assessment results\
+- Longitudinal comparisons\
+- Data suitable for export and subsequent clinical analysis\
+\
+Distinguish established clinical performance measures from\
+exploratory camera-derived measurements.\
+\
+Do not claim the prototype produces validated digital\
+biomarkers, diagnoses diseases, or establishes drug efficacy.\
+\
+--------------------------------------------------\
+2. CLINICAL AND SCIENTIFIC EVIDENCE\
+--------------------------------------------------\
+\
+Create a research-supported evidence section.\
+\
+Review the following examples:\
+\
+A. ANAMORELIN / ROMANA 1 AND ROMANA 2\
+\
+Explain how improvements in lean body mass did not\
+translate into demonstrated improvements in handgrip\
+strength.\
+\
+Review the EMA's reasons for refusing authorization,\
+including both the clinical-benefit and safety-data concerns.\
+\
+Explain why endpoint selection and evidence of meaningful\
+clinical benefit matter in drug development.\
+\
+Do not suggest a different measurement would necessarily\
+have changed the regulatory outcome.\
+\
+B. PONSEGROMAB / CANCER CACHEXIA\
+\
+Review the published Phase II study.\
+\
+Describe:\
+\
+- Clinical indication\
+- Study population\
+- Primary endpoint\
+- Relevant secondary endpoints\
+- Role of GDF-15\
+- Digital physical activity measurements\
+\
+Explain how biological, symptomatic, and functional\
+measurements can provide complementary evidence.\
+\
+C. CAMERA-BASED PHYSICAL ASSESSMENT VALIDATION\
+\
+Review:\
+\
+Bertrand et al., PLOS Digital Health, January 2026.\
+\
+This study evaluated automated physical-performance\
+assessments in 228 adults.\
+\
+Extract:\
+\
+- Population\
+- Technology used\
+- Assessments performed\
+- Agreement with clinical reference measurements\
+- Data loss\
+- Limitations\
+- Remaining validation needs\
+\
+Explicitly acknowledge that automated camera-based\
+functional assessment already exists.\
+\
+Identify what MotionVitals would need to do differently\
+to create a viable product.\
+\
+D. DIGITAL ENDPOINT REGULATORY PRECEDENTS\
+\
+Review:\
+\
+- FDA digitally derived measures framework\
+- FDA clinical outcome assessment guidance\
+- FDA digital health technology clinical investigation guidance\
+- EMA qualification of wearable-derived stride velocity\
+  in Duchenne muscular dystrophy\
+\
+Explain the distinction between:\
+\
+1. Digital measurements\
+2. Performance outcome assessments\
+3. Biological biomarkers\
+4. Exploratory endpoints\
+5. Qualified or validated endpoints\
+\
+Describe how new measurements progress from technical\
+verification through analytical and clinical validation\
+toward potential regulatory use.\
+\
+--------------------------------------------------\
+3. CLINICAL APPLICATIONS\
+--------------------------------------------------\
+\
+Develop two separate adoption stories.\
+\
+APPLICATION A:\
+PHARMACEUTICAL CLINICAL TRIALS\
+\
+Primary initial market.\
+\
+Target customers:\
+\
+- Pharmaceutical companies\
+- Biotechnology companies\
+- Clinical research organizations\
+- Digital endpoint providers\
+\
+Initial therapeutic applications:\
+\
+- Cancer cachexia\
+- Sarcopenia\
+- Geriatric oncology\
+- Selected neuromuscular diseases\
+\
+Describe a realistic clinical trial workflow.\
+\
+Example:\
+\
+A Phase II sponsor is evaluating a treatment intended\
+to improve muscle function.\
+\
+Participants complete standardized functional assessments\
+at baseline and predefined follow-up visits.\
+\
+MotionVitals automates selected measurements.\
+\
+The resulting functional data are integrated with existing\
+clinical trial datasets containing:\
+\
+- Laboratory biomarkers\
+- Body composition measurements\
+- Clinical outcomes\
+- Patient-reported outcomes\
+- Treatment assignment, where appropriate\
+\
+Show how longitudinal functional measurements might\
+contribute to exploratory efficacy assessment and\
+development decisions.\
+\
+Identify what the system measures directly versus\
+what is imported from other clinical data sources.\
+\
+Do not claim MotionVitals independently measures\
+GDF-15, muscle mass, or other laboratory biomarkers.\
+\
+APPLICATION B:\
+ROUTINE CLINICAL PRACTICE\
+\
+Potential future market.\
+\
+Develop adoption scenarios for:\
+\
+- Geriatric oncology clinics\
+- Rehabilitation practices\
+- Selected geriatric and mobility-assessment services\
+\
+Example:\
+\
+A patient undergoing cancer treatment completes a\
+standardized functional assessment at baseline and\
+subsequent clinic visits.\
+\
+MotionVitals documents the objective measurements\
+and displays longitudinal changes.\
+\
+A clinician reviews these changes alongside symptoms,\
+examination findings, and other clinical information.\
+\
+Explain how the system might support more consistent\
+assessment and documentation.\
+\
+Do not claim automated measurements diagnose\
+deterioration or replace clinical judgment.\
+\
+Address practical adoption questions:\
+\
+- Who administers the assessment?\
+- How much space is needed?\
+- How long does it take?\
+- What training is required?\
+- How are results documented?\
+- Who reviews the results?\
+- Who pays for the system?\
+- Is there an existing reimbursement pathway?\
+- What evidence would justify purchasing it?\
+\
+Do not assume reimbursement exists.\
+\
+--------------------------------------------------\
+4. COMMERCIAL BUSINESS CASE\
+--------------------------------------------------\
+\
+Develop a realistic B2B business model.\
+\
+PRIORITIZE PHARMACEUTICAL CLINICAL TRIALS.\
+\
+Potential pricing structures:\
+\
+- Study-level software licensing\
+- Per-site or per-study deployment\
+- Per-assessment pricing\
+- Validation and endpoint-development services\
+- Enterprise licensing to pharmaceutical sponsors or CROs\
+\
+Do not invent actual market prices.\
+\
+Identify the economic buyer and purchasing process.\
+\
+Develop an economic value proposition around:\
+\
+1. Reduced scoring and documentation effort\
+2. Improved consistency of measurement\
+3. Reduced measurement failures and rework\
+4. Potentially lower total assessment cost\
+5. Improved availability of longitudinal data\
+6. Better-supported clinical development decisions\
+\
+Explain which benefits are immediately plausible,\
+which require empirical validation, and which are\
+longer-term hypotheses.\
+\
+Create an illustrative ROI model with adjustable inputs:\
+\
+- Number of patients\
+- Number of assessment visits\
+- Number of sites\
+- Staff minutes per conventional assessment\
+- Staff minutes per automated assessment\
+- Fully loaded staff cost\
+- Assessment failure or repeat rate\
+- Hardware cost\
+- Software licensing cost\
+- Deployment and training cost\
+- Validation and support cost\
+\
+Calculate:\
+\
+- Conventional total assessment cost\
+- MotionVitals total assessment cost\
+- Potential savings\
+- Break-even assumptions\
+\
+Clearly label all assumed values.\
+\
+Do not claim the system is cheaper or more accurate\
+without supporting evidence.\
+\
+--------------------------------------------------\
+5. COMPETITIVE LANDSCAPE\
+--------------------------------------------------\
+\
+Research existing competitors and comparable technologies.\
+\
+Include:\
+\
+- Koneksa\
+- Clario\
+- OneStep\
+- Published Ameya markerless motion capture application\
+- Other relevant digital endpoint or motion analysis vendors\
+\
+Evaluate:\
+\
+- Existing functional assessments\
+- Hardware requirements\
+- Clinical validation\
+- Clinical trial experience\
+- Workflow integration\
+- Data quality and auditability\
+- Deployment model\
+- Privacy architecture\
+- Commercial offering\
+\
+Identify genuine potential differentiation.\
+\
+Do not position the basic ability to count chair stands\
+or measure gait speed as a new invention.\
+\
+Evaluate whether our strongest differentiation could be:\
+\
+A. Lower-cost deployment\
+B. Reliable on-device inference\
+C. Standardized clinical trial endpoint workflows\
+D. Privacy-preserving local processing\
+E. Automated measurement quality control\
+F. Integration with multimodal trial evidence\
+\
+Explicitly identify competitive gaps that remain unproven.\
+\
+--------------------------------------------------\
+6. TECHNICAL ARCHITECTURE\
+--------------------------------------------------\
+\
+Available hackathon hardware:\
+\
+- Qualcomm Snapdragon X Elite laptop\
+- Orbbec Astra 2 depth camera\
+- Meta ExecuTorch framework\
+\
+We do not have an Arduino board or robotic actuators.\
+\
+COMPUTE TRACK REQUIREMENTS\
+\
+The implementation must demonstrate genuine\
+ExecuTorch model inference on the Snapdragon device.\
+\
+Prioritize a reliable local inference pipeline.\
+\
+Proposed architecture:\
+\
+CAMERA INPUT\
+    \uc0\u8595 \
+POSE ESTIMATION / MOVEMENT DETECTION\
+    \uc0\u8595 \
+PYTORCH MODEL EXPORTED TO EXECUTORCH\
+    \uc0\u8595 \
+MOVEMENT EVENT DETECTION\
+    \uc0\u8595 \
+DETERMINISTIC TEST SCORING\
+    \uc0\u8595 \
+MEASUREMENT QUALITY CONTROL\
+    \uc0\u8595 \
+STRUCTURED CLINICAL DATA\
+    \uc0\u8595 \
+FUNCTIONAL ASSESSMENT DASHBOARD\
+\
+The engineering team should verify:\
+\
+- Model compatibility with ExecuTorch\
+- Actual .pte model execution\
+- Windows ARM64 runtime compatibility\
+- Qualcomm acceleration availability\
+- Camera SDK compatibility\
+- Inference latency\
+- Measurement repeatability\
+\
+Do not assume that ExecuTorch automatically uses\
+the Qualcomm NPU.\
+\
+A CPU fallback is acceptable for technical continuity,\
+but must be identified accurately.\
+\
+Camera compatibility is an important technical risk.\
+\
+The Orbbec SDK's documented Windows support\
+does not establish compatibility with every\
+Snapdragon ARM64 configuration.\
+\
+Prepare standard webcam or prerecorded-video fallbacks.\
+\
+All model-generated measurements must be labeled\
+as experimental until validated.\
+\
+--------------------------------------------------\
+7. HACKATHON MINIMUM VIABLE PRODUCT\
+--------------------------------------------------\
+\
+Build around ONE primary assessment:\
+\
+Five-Times Sit-to-Stand.\
+\
+MINIMUM FUNCTIONAL DEMO\
+\
+1. User starts an assessment.\
+2. Camera captures movements.\
+3. ExecuTorch performs local model inference.\
+4. System identifies sit-to-stand transitions.\
+5. Application counts repetitions.\
+6. Application measures completion time.\
+7. Results appear on a dashboard.\
+8. Results can be exported as structured data.\
+\
+OPTIONAL ENHANCEMENTS\
+\
+- Individual rise and descent times\
+- Movement consistency measures\
+- Quality-control flags\
+- Comparison against reference timing\
+- A second functional assessment\
+\
+CLINICAL TRIAL DEMONSTRATION\
+\
+Show a sample longitudinal patient profile.\
+\
+Use synthetic data for:\
+\
+- Baseline functional performance\
+- Follow-up functional performance\
+- GDF-15 concentrations\
+- Body composition\
+- Patient-reported physical functioning\
+\
+Demonstrate how real camera-derived functional\
+measurements could be integrated with other\
+trial measurements.\
+\
+Do not present synthetic measurements as real\
+patient data.\
+\
+Technical deliverables should include:\
+\
+- Hardware and software requirements\
+- Selected model and architecture\
+- Data processing pipeline\
+- User interface requirements\
+- Measurement algorithms\
+- Structured data output specification\
+- Quality-control procedures\
+- Known limitations\
+- Fallback strategy\
+- Testing protocol\
+- Team responsibilities\
+\
+Separate MUST-HAVE features from STRETCH features.\
+\
+--------------------------------------------------\
+8. CLINICAL TRIAL DATA REQUIREMENTS\
+--------------------------------------------------\
+\
+Define a proposed structured assessment record.\
+\
+At minimum:\
+\
+- Synthetic participant identifier\
+- Study identifier\
+- Visit identifier\
+- Assessment type\
+- Assessment timestamp\
+- Repetition count\
+- Completion time\
+- Measurement units\
+- Quality-control status\
+- Model version\
+- Software version\
+- Device metadata\
+- Data source\
+- Processing status\
+\
+Describe how longitudinal data would be structured\
+for clinical trial analysis.\
+\
+Identify future requirements for:\
+\
+- Traceability\
+- Audit trails\
+- Version control\
+- Source-data integrity\
+- Validation documentation\
+- Controlled data export\
+- Integration with EDC or clinical data platforms\
+\
+The hackathon prototype does not need to be a\
+validated regulated clinical trial system.\
+\
+However, the architecture should demonstrate\
+awareness of these requirements.\
+\
+--------------------------------------------------\
+9. PRIVACY, SECURITY, AND REGULATORY STRATEGY\
+--------------------------------------------------\
+\
+Position MotionVitals as privacy-first.\
+\
+Core design principle:\
+\
+Perform sensitive video processing locally\
+whenever technically feasible.\
+\
+Avoid sending identifiable video to the cloud\
+unless explicitly required and appropriately authorized.\
+\
+Do not claim that on-device AI automatically\
+makes the technology HIPAA-compliant.\
+\
+Discuss future requirements for:\
+\
+- HIPAA applicability\
+- Risk assessment\
+- Authentication and access controls\
+- Encryption\
+- Data retention\
+- Auditability\
+- Appropriate contractual safeguards\
+- FDA software/device considerations\
+- Clinical trial computerized-system controls\
+- Potential applicability of 21 CFR Part 11\
+\
+Separate the privacy advantages of the architecture\
+from actual compliance status.\
+\
+Use only synthetic or appropriately consented\
+demonstration data.\
+\
+Do not use confidential employer information,\
+proprietary clinical trial datasets, or internal\
+company documents.\
+\
+--------------------------------------------------\
+10. HACKATHON PITCH DECK\
+--------------------------------------------------\
+\
+Create a compelling 9-10 slide presentation.\
+\
+Audience:\
+\
+- Qualcomm engineers\
+- Meta / ExecuTorch experts\
+- Startup and technology judges\
+- Potential investors\
+\
+The story must be understandable to nonclinical judges.\
+\
+Use the following narrative:\
+\
+SLIDE 1 \'97 MOTIONVITALS AI\
+Turning Physical Function into Clinical Evidence\
+\
+SLIDE 2 \'97 THE PROBLEM\
+Drugs can change biomarkers without demonstrating\
+meaningful improvements in physical function.\
+\
+Clinical trials need reliable functional outcomes.\
+\
+SLIDE 3 \'97 THE EVIDENCE\
+Use anamorelin and ponsegromab to illustrate why\
+functional evidence matters in drug development.\
+\
+SLIDE 4 \'97 CURRENT MEASUREMENT CHALLENGES\
+Existing functional assessments, operational complexity,\
+measurement variability, and data integration.\
+\
+Identify which challenges are documented versus\
+hypothesized for our proposed solution.\
+\
+SLIDE 5 \'97 OUR SOLUTION\
+Camera-based physical-function measurement using\
+on-device AI.\
+\
+SLIDE 6 \'97 LIVE DEMONSTRATION\
+Automated sit-to-stand assessment and structured\
+measurement output.\
+\
+SLIDE 7 \'97 QUALCOMM + EXECUTORCH\
+Explain the actual technical architecture.\
+\
+Show measured inference results, actual hardware\
+utilization, and offline capabilities.\
+\
+Do not claim NPU acceleration unless verified.\
+\
+SLIDE 8 \'97 CLINICAL TRIAL APPLICATION\
+Integrating physical function with biomarkers,\
+imaging and patient-reported outcomes.\
+\
+SLIDE 9 \'97 BUSINESS MODEL AND MARKET\
+Pharmaceutical sponsors and CROs as initial buyers.\
+\
+Business economics and validation strategy.\
+\
+SLIDE 10 \'97 ROADMAP AND VISION\
+From hackathon prototype to validated clinical\
+measurement platform.\
+\
+End with a strong, memorable statement:\
+\
+"Because treatment success isn't just what changes\
+in the laboratory. It's what patients can actually do."\
+\
+DESIGN REQUIREMENTS\
+\
+Clean, modern, clinically credible.\
+\
+Avoid generic AI imagery and excessive text.\
+\
+Use clear medical diagrams, a simple architecture\
+visual, and an actual demonstration screenshot\
+when available.\
+\
+Distinguish demonstrated capabilities from\
+future-state concepts.\
+\
+Include references for clinical and regulatory claims.\
+\
+Do not invent performance statistics.\
+\
+--------------------------------------------------\
+11. HACKATHON JUDGING STRATEGY\
+--------------------------------------------------\
+\
+Align deliverables with the judging criteria\
+provided by the organizers.\
+\
+Known categories from the presentation:\
+\
+- Innovation, product value and user experience:\
+  40 points\
+- Technical implementation:\
+  25 points\
+- On-device AI and efficiency:\
+  15 points\
+\
+Additional points cover deployment/documentation\
+and presentation/demo.\
+\
+Verify the complete official scoring rubric before\
+assigning scores to the remaining categories.\
+\
+Create a judging strategy explaining:\
+\
+- What makes the product useful\
+- Why it is technically credible\
+- Why ExecuTorch is essential\
+- Why Snapdragon is relevant\
+- How the prototype demonstrates real functionality\
+- What metrics will be displayed\
+- How the team will explain its commercial potential\
+\
+Prioritize working end-to-end inference over\
+unnecessary complexity.\
+\
+Do not claim the project will win.\
+\
+--------------------------------------------------\
+12. POST-HACKATHON COMMERCIALIZATION\
+--------------------------------------------------\
+\
+Create a realistic roadmap.\
+\
+STAGE 1:\
+Prototype and technical feasibility\
+\
+STAGE 2:\
+Analytical validation against reference methods\
+\
+STAGE 3:\
+Prospective clinical feasibility study\
+\
+STAGE 4:\
+Exploratory use in a pharmaceutical clinical trial\
+\
+STAGE 5:\
+Validated disease-specific assessment modules\
+\
+STAGE 6:\
+Potential expansion into clinical practice\
+\
+For each stage provide:\
+\
+- Required evidence\
+- Potential partner\
+- Estimated workstreams\
+- Key risks\
+- Success criteria\
+- Commercial milestones\
+\
+Do not invent specific timelines or investment\
+requirements without stating assumptions.\
+\
+--------------------------------------------------\
+13. REQUIRED OUTPUTS\
+--------------------------------------------------\
+\
+Create an organized project workspace containing:\
+\
+01_PRODUCT_AND_BUSINESS_CASE.md\
+\
+Comprehensive clinical problem, proposed solution,\
+target customers, commercial model, competition,\
+differentiation and adoption strategy.\
+\
+02_CLINICAL_EVIDENCE_AND_REGULATORY.md\
+\
+Evidence review, relevant clinical studies,\
+endpoint definitions, validation considerations,\
+regulatory positioning and references.\
+\
+03_TECHNICAL_SPECIFICATIONS.md\
+\
+Technical architecture, model requirements,\
+measurement algorithms, testing criteria,\
+hardware dependencies and MVP specifications.\
+\
+04_HACKATHON_PITCH.md\
+\
+Complete slide-by-slide content, presentation\
+narrative and speaker notes.\
+\
+05_COMMERCIALIZATION_ROADMAP.md\
+\
+Market entry strategy, clinical validation,\
+business economics and post-hackathon milestones.\
+\
+06_SOURCES.md\
+\
+Source URLs, key findings and evidence limitations.\
+\
+Also create an editable presentation:\
+\
+MotionVitals_Hackathon_Pitch.pptx\
+\
+If the presentation cannot be generated in the\
+available environment, prepare a complete\
+slide-by-slide markdown deck that can be converted.\
+\
+--------------------------------------------------\
+14. WORKING PRINCIPLES\
+--------------------------------------------------\
+\
+Think like a combined team of:\
+\
+- Pharmaceutical clinical development experts\
+- Clinical outcome assessment scientists\
+- Digital health engineers\
+- Qualcomm / ExecuTorch developers\
+- Medical technology investors\
+- Healthcare commercialization specialists\
+\
+Be scientifically rigorous.\
+\
+Do not overstate novelty.\
+\
+Do not invent clinical validation.\
+\
+Do not claim regulatory approval.\
+\
+Do not claim HIPAA compliance.\
+\
+Do not invent market size or revenue projections.\
+\
+Do not use confidential employer information.\
+\
+Distinguish:\
+\
+WHAT EXISTS TODAY\
+WHAT WE CAN BUILD THIS WEEKEND\
+WHAT REQUIRES VALIDATION\
+WHAT COULD BECOME A COMMERCIAL PRODUCT\
+\
+The primary objective is to produce a coherent,\
+credible and compelling business and technical\
+package that supports both the hackathon\
+presentation and future commercial development.\
+\
+Start by creating a concise project summary,\
+a prioritized list of technical requirements,\
+and the complete pitch outline.\
+\
+Then develop the supporting documents and\
+presentation using the same validated assumptions.\
+\
+Flag unresolved decisions and dependencies clearly.}

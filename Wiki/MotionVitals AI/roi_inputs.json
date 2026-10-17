@@ -1,0 +1,14 @@
+{
+  "participants": 200,
+  "visits_per_participant": 4,
+  "sites": 10,
+  "conventional_minutes": 12,
+  "automated_minutes": 8,
+  "staff_cost_per_hour": 60,
+  "conventional_repeat_rate": 0.10,
+  "automated_repeat_rate": 0.05,
+  "hardware_per_site": 1000,
+  "software_per_study": 5000,
+  "deployment_training_per_site": 500,
+  "validation_support_per_study": 3000
+}
