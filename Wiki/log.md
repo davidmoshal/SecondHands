@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — MotionVitals package reviewed and decisions opened
+
+Read Szvier's MotionVitals AI package in full and added [the decisions page](motionvitals-decision.md): relation to the build, five items adopted without a vote (protocol precision, failure demonstration, evidence bar, record schema, claim controls), seven Questions SH-Q-007 to SH-Q-013 with recommendations, and open items for the author. Opened [issue #33](https://github.com/SecondHands-AI/SecondHands/issues/33) for the vote, published a decision board with live voting, added a read-only copy to the Pages site, linked the package from the index, added SH-T-069 to the plan, and recorded source SH-S-030.
+
 ## 2026-10-17 — Live page counts chair stands from leg drop
 
 The live camera page did not count sit-to-stands from a frontal camera because the two-dimensional knee angle stays near 145° while seated. Changed the chair-stand rule to the leg drop (knee-to-hip height in torso lengths, seated below 0.55, standing above 0.85, both editable in the Clinic view), added knee angles from MediaPipe's three-dimensional world landmarks as the sanity check and for display, and verified the new rule on synthetic frontal poses (two reps counted, a shallow attempt ignored) and the page in headless Chromium. Recorded the finding in [brief D1](design/implementation-briefs.md#d1--analysis-angles-rep-counter-scorers) so the Python engine uses the same signal.

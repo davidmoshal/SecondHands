@@ -12,7 +12,7 @@
 4. For a coding agent: give it the brief's heading, the repository, and the instruction to stop at the brief's acceptance checks. Briefs marked agent-friendly need no camera and no laptop. Review the agent's pull request like any other.
 5. The laptop is shared: follow [the team workflow](runbooks/team-workflow.md#sharing-the-one-snapdragon-laptop). Only Workstreams B, C2, G1, and G3 need it.
 
-Workstream issues #19 to #26 were created on 2026-10-17 evening in the `SecondHands-AI/SecondHands` repository; the previous-idea issues #1 to #9 remain below. Next free identifiers: task SH-T-069, question SH-Q-007, source SH-S-030. Check again before using them.
+Workstream issues #19 to #26 were created on 2026-10-17 evening in the `SecondHands-AI/SecondHands` repository; the previous-idea issues #1 to #9 remain below. Next free identifiers: task SH-T-070, question SH-Q-014, source SH-S-031. Check again before using them.
 
 ## Dependencies and order
 
@@ -109,6 +109,7 @@ C1, D1, D2, and E1 can be built and tested on any computer with a fake backend a
 **Owner: Vishwa; anyone may contribute.** Brief [I](design/implementation-briefs.md#i--documentation-sync). GitHub: [issue #26](https://github.com/SecondHands-AI/SecondHands/issues/26).
 
 - [ ] **SH-T-048 — Update the Wiki, README, proposal, and issues to the tracker direction.** Keep the assistive story as an extension; update [issues #1 to #7](https://github.com/davidmoshal/SecondHands/issues) descriptions.
+- [ ] **SH-T-069 — Close the MotionVitals decisions.** Collect the votes from [issue #33](https://github.com/SecondHands-AI/SecondHands/issues/33), record each answer under [SH-Q-007 to SH-Q-013](motionvitals-decision.md#questions), then update the plan, briefs D1, D2, E1, Workstream G acceptance, and Workstream H with the adopted items and the outcomes.
 - [ ] **SH-T-055 — Link the teammates' documents.** PRD, TDD, frontend document, from [the document map](design/tech-stack.md#document-map-for-the-team) and the index.
 - [ ] **SH-T-042 — Confirm GitHub owner accounts.** Resolve [SH-Q-003](project.md#sh-q-003--github-accounts-for-the-named-owners) so the remaining owners can be assigned.
 - [ ] **SH-T-034 — Expand the design documentation.** Now covered by the tech stack, briefs, and team workflow pages; close by linking them from [the design index](design/index.md) and removing the stale proposal list.
