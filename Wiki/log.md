@@ -4,6 +4,17 @@
 
 Added a [local installs table](references/tailscale.md#local-installs) to the Tailscale reference: the Dell laptop is reported installed, and the project owner's Mac was checked and has no Tailscale installation. The install steps stay in [the runbook](runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale). No connection was tested.
 
+## 2026-10-17 — Team workflow and laptop sharing documented
+
+Added [the team workflow runbook](runbooks/team-workflow.md): project structure with proposed `perception`, `analysis`, `protocols`, and `storage` modules, the separation-of-concerns table with owners, Git collaboration rules, rules for sharing the Tailscale-connected Snapdragon laptop (steward, exclusive camera, proposed paths and ports, environment discipline), and the model acquisition table with ExecuTorch status. Noted the port 8765 conflict between the API and the depth bridge viewer and added SH-T-059. Linked from the index; source SH-S-028.
+
+## 2026-10-17 — Interactive console prototype linked
+
+Published an interactive prototype of the clinic console (live session with simulated skeleton and the real knee-angle hysteresis rep counter, single-leg stance test with live sway and events, progress chart, editable protocol thresholds, device status) and linked it from [use cases](use-cases.md) and [the tech stack frontend section](design/tech-stack.md#frontend). Camera and keypoints in the prototype are simulated; it is a reference for the frontend, not a measurement.
+
+## 2026-10-17 — Use cases, ownership, and project brief
+
+Added [use cases and team ownership](use-cases.md): the clinician-owned protocol principle, the use-case catalog with conditions (clinical assessment, rehabilitation, field sobriety support, private skin screening, assistive control, other settings), the protocol template, engine benchmarks, the proposed ownership map, reach to phones, and privacy rules. Published a companion project brief with process and interface sketches and linked it. Added the direction to [Project direction](project.md#established-user-direction), SH-T-057 and SH-T-058 to [the plan](plan.md#movement-tracker), navigation in [the index](index.md), and source SH-S-027. Thresholds are placeholders until the clinicians supply them.
 ## 2026-10-17 — Candidate skeletal medical tests listed
 
 Added [ten candidate tests](requirements/skeletal-medical-tests.md) that a body-pose camera can time, count, or measure: one-leg stance, four-stage balance, Timed Up and Go, gait speed, two chair-stand tests, heel-to-toe walk, functional reach, active range of motion, and the two-minute step test. Linked the list from the index, [Project direction](project.md#established-user-direction), the [fitness-tracker scope](design/tech-stack.md#what-the-product-does), and the [field sobriety example](requirements/field-sobriety.md). Recorded source SH-S-026. No test was selected, implemented, or validated.
