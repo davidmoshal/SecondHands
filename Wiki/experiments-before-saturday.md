@@ -99,6 +99,16 @@ The parent reviewed the source and inspected the stopped dashboard in the collab
 
 Limits remain: one active mapping and participant, exactly one detected hand for hand commands, shared activation/release scores across cues, in-memory sample calibration rather than a trained classifier, and comparison of already-computed MediaPipe outputs. At this dashboard check, the remaining pretrained candidates were untested; later image experiments are recorded below. Participant accuracy/false activations, complete interaction latency, physical controls, remote operation, and Windows/NPU execution remain untested. Native work must finish before resource cleanup; there is no forced camera-driver interruption.
 
+## React and Bun migration observations
+
+On 2026-10-17, the user requested [issue #11](https://github.com/davidmoshal/SecondHands/issues/11), replacement of Vue with React, and Bun if compatible. The dashboard now uses React 19.3.1, TypeScript, and Vite with Bun 1.4.3. The Python source, WebSocket transport, recognition models, and command semantics are unchanged. [The runbook](runbooks/mac-and-snapdragon-development.md#run-the-live-exploration-dashboard) owns startup commands; the root just task names are unchanged.
+
+Observed on the Mac: a clean Bun dependency installation succeeded, followed by the frozen-lockfile `just setup-ui` check. `just test-dashboard` passed 38 Python tests with one opt-in model test skipped, seven UI tests, TypeScript checking, and the Vite production build. The five new React tests first failed against an empty dashboard, then passed after migration. They exercise explicit camera start, frame/landmark matching, readings, the lamp and history, calibration suggestions without automatic application, mapping submission, frozen results, cancellation, disconnect/error handling, and cleanup under React StrictMode. The two existing transport tests still cover bounded requests and stale-result rejection. These tests use a fake WebSocket, not a camera.
+
+Vitest runs under Bun with Happy DOM for browser elements. jsdom failed during environment setup. Happy DOM also rejected valid decimal input steps, so the mapping test dispatches form submission directly. A native browser check separately accepted activation 0.8 and release 0.2. The stopped dashboard rendered all five panels without a console error or horizontal overflow at 1280 px and 390 px; the narrower view used one column. No physical camera was opened. This is not a live recognition or Windows test.
+
+[Bun 1.4.3 release assets](https://github.com/oven-sh/bun/releases/tag/bun-v1.4.3) include `bun-windows-aarch64.zip` and Apple Silicon builds. That establishes availability of the tool, not successful installation on the Dell or compatibility of the separate Python dependencies. Target-device execution remains in [the deployment phase](plan.md#snapdragon-deployment).
+
 ## Decision-model image observations
 
 On 2026-10-17, the user requested setup, testing, and documentation of the remaining three starting candidates. Laya Vision, Mapika Decider Vision, and SmolVLM completed local image tests on an Apple M3 Max Mac with 128 GiB RAM. Together with the two MediaPipe bundles, all five starting candidates now execute locally. These are CLI experiments, separate from the dashboard. No camera was opened and no personal recordings were used.

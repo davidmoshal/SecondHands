@@ -2,7 +2,7 @@
 
 Use this runbook to work on SecondHands from the Mac and run the same source on the Windows ARM64 Snapdragon PC. The user requested this workflow explanation as a runbook on 2026-10-16. The Mac setup is verified; the PC setup and T3 connection remain untested because the device is first available at the hackathon.
 
-The application has a Python MediaPipe face/hand baseline and a connected Vue exploration dashboard. Backend/trigger tests, frontend transport tests, public-image inference, and the stopped browser UI have been checked on the Mac. A physical camera, participant recognition accuracy, and Windows execution remain untested. [Project direction](../project.md#development-setup) owns package responsibilities, [observed dashboard checks](../experiments-before-saturday.md#dashboard-implementation-observations) own verification results, and [the task plan](../plan.md) owns work status.
+The application has a Python MediaPipe face/hand baseline and a connected React exploration dashboard. Backend/trigger tests, frontend transport tests, public-image inference, and the stopped browser UI have been checked on the Mac. A physical camera, participant recognition accuracy, and Windows execution remain untested. [Project direction](../project.md#development-setup) owns package responsibilities, [observed dashboard checks](../experiments-before-saturday.md#dashboard-implementation-observations) own verification results, and [the task plan](../plan.md) owns work status.
 
 ## What is shared between machines
 
@@ -10,20 +10,22 @@ Use one Git repository with a separate checkout on each computer. Git transfers 
 
 - [`src/secondhands/`](../../src/secondhands/__init__.py) contains the shared Python source.
 - [`pyproject.toml`](../../pyproject.toml) defines Python dependencies and tools; [`uv.lock`](../../uv.lock) records resolved dependency versions and platform packages.
-- [`ui/`](../../ui/package.json) contains the Vue source and frontend configuration; its `pnpm-lock.yaml` records frontend dependencies.
+- [`ui/`](../../ui/package.json) contains the React source and frontend configuration; its [`bun.lock`](../../ui/bun.lock) records frontend dependencies.
 - `.venv`, `node_modules`, local recordings under `data/`, and model files under `artifacts/` stay local and are ignored by Git. Recreate environments on each machine instead of copying them.
 
 The source can be shared while installed packages differ by operating system and processor. A lockfile records dependencies; it does not prove that every dependency or hardware backend works on both machines. Keep required platform differences in configuration and small runtime-specific modules within the same repository.
 
 ## Prerequisites
 
-Both machines need Git, access to the SecondHands remote, and [uv](https://docs.astral.sh/uv/getting-started/installation/). [`.python-version`](../../.python-version) selects Python 3.12. UI development also needs Node.js 22.12 or later and pnpm 10.33.0, as recorded in [`ui/package.json`](../../ui/package.json). The task shortcuts use [just](https://just.systems/); it is installed on the Mac.
+Both machines need Git, access to the SecondHands remote, and [uv](https://docs.astral.sh/uv/getting-started/installation/). [`.python-version`](../../.python-version) selects Python 3.12. UI development also needs [Bun 1.4.3](https://bun.com/docs/installation), as recorded in [`ui/package.json`](../../ui/package.json). The task shortcuts use [just](https://just.systems/); it is installed on the Mac.
+
+Bun replaces pnpm for the UI. Use the committed Bun lockfile; do not maintain a second package-manager lockfile. The scripts explicitly use the Bun runtime for Vite, TypeScript, and Vitest. Run tests with `bun run --cwd ui test`, not `bun test`, because the project uses Vitest. [Bun 1.4.3 publishes Windows ARM64 and Apple Silicon packages](https://github.com/oven-sh/bun/releases/tag/bun-v1.4.3); only the Mac execution is verified here. This does not resolve the Python ARM64 limits below.
 
 Run the commands below from the checkout's root directory unless a step says otherwise. The Git examples assume the current project branch, `main`.
 
 ## Try the existing scaffold on the Mac
 
-The Mac already has this checkout. The user confirmed on 2026-10-16 that Python setup, the tensor smoke command, UI installation, and UI startup worked. The root [`justfile`](../../justfile) now owns shortcuts for those commands. Install the Python/PyTorch and UI dependencies, then run the CPU check:
+The Mac already has this checkout. The user confirmed on 2026-10-16 that Python setup, the tensor smoke command, the original pnpm UI installation, and Vue startup worked. The later [React/Bun checks](../experiments-before-saturday.md#react-and-bun-migration-observations) verify the replacement UI tooling. The root [`justfile`](../../justfile) keeps the same shortcut names and now uses Bun for UI commands. Install the Python/PyTorch and UI dependencies, then run the CPU check:
 
 ```sh
 just setup
@@ -57,7 +59,7 @@ Start the Python service in one terminal:
 just dev-api
 ```
 
-Start Vue in a second terminal:
+Start React in a second terminal:
 
 ```sh
 just dev-ui
@@ -87,7 +89,7 @@ just recognize-camera
 
 The download recipe fetches versioned Face Landmarker and Gesture Recognizer bundles from Google's model storage, verifies their SHA-256 checksums, and stores them under ignored `artifacts/mediapipe/`. Downloads are explicit; inference does not silently fetch models. The asset URLs and checksums are owned by [`recognition/assets.py`](../../src/secondhands/recognition/assets.py).
 
-The camera recipe uses camera index 0, enables a local OpenCV preview, and stops after at most 300 frames. Press `q` in the preview or Ctrl+C to stop earlier. OS camera permission may be needed. This CLI uses a separate local window; use the dashboard procedure above for Vue results. No recording is saved automatically.
+The camera recipe uses camera index 0, enables a local OpenCV preview, and stops after at most 300 frames. Press `q` in the preview or Ctrl+C to stop earlier. OS camera permission may be needed. This CLI uses a separate local window; use the dashboard procedure above for React results. No recording is saved automatically.
 
 For an image, pass the path to an existing local file; files containing people or personal observations belong outside Git:
 
@@ -205,7 +207,7 @@ Install the UI dependencies on the PC only if building or running the UI there. 
    uv sync --locked
    ```
 
-4. Run the relevant commands on the PC and inspect its output. If UI dependencies changed and the UI is used there, run `pnpm --dir ui install --frozen-lockfile` there too.
+4. Run the relevant commands on the PC and inspect its output. If UI dependencies changed and the UI is used there, run `bun install --cwd ui --frozen-lockfile` there too.
 
 The PC command above updates the base Python environment. Enable an optional model extra only after establishing a supported execution path on that machine. If a pull refuses because of local changes or branch divergence, reconcile those changes before continuing; preserve work on both machines.
 
@@ -264,7 +266,7 @@ Install T3 and configure the chosen coding-agent provider on the PC. Connect the
 
 A command started in the PC's T3 environment executes on the PC, using its checkout, Python environment, files, and available hardware. A command started in the Mac environment executes on the Mac. Confirm the selected environment and working directory before running commands.
 
-The local application now has Python capture frames and run inference, with Vue displaying that process's results. A remote application connection still needs separate configuration and device verification; opening a dashboard page on the Mac alone does not select the PC's camera. The current services bind to loopback and permit local Vite browser origins only.
+The local application now has Python capture frames and run inference, with React displaying that process's results. A remote application connection still needs separate configuration and device verification; opening a dashboard page on the Mac alone does not select the PC's camera. The current services bind to loopback and permit local Vite browser origins only.
 
 ## Windows ARM64 compatibility limit
 
@@ -285,7 +287,8 @@ uv build
 For UI changes:
 
 ```sh
-pnpm --dir ui build
+bun run --cwd ui test
+bun run --cwd ui build
 ```
 
 Run the Python baseline tests with `just test-vision`. The real-model integration test is opt-in and requires downloaded bundles. On the Mac, enable it with:
@@ -294,7 +297,7 @@ Run the Python baseline tests with `just test-vision`. The real-model integratio
 SECONDHANDS_TEST_MODELS=artifacts/mediapipe uv run --locked --extra vision pytest -q
 ```
 
-For the complete dashboard checks, including the Vue transport tests and production build:
+For the complete dashboard checks, including the React interaction and transport tests and production build:
 
 ```sh
 SECONDHANDS_TEST_MODELS=artifacts/mediapipe just test-dashboard

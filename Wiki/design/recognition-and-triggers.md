@@ -1,6 +1,8 @@
 # Recognition and triggers
 
-**Status: local exploration implemented on 2026-10-17 after the user's approval and explicit subagent request.** This covers the dashboard and configurable trigger experiments, not final numerical thresholds or demonstration criteria. Backend/trigger tests, frontend transport tests, the Vue build, and public-image backend inference passed. The parent inspected the stopped dashboard and API proxy in a browser. A physical camera, participant accuracy, and Windows remain untested. See [observed results](../experiments-before-saturday.md#dashboard-implementation-observations).
+**Status: local exploration implemented on 2026-10-17 after the user's approval and explicit subagent request.** This covers the dashboard and configurable trigger experiments, not final numerical thresholds or demonstration criteria. Backend/trigger tests, frontend transport tests, the initial Vue build, and public-image backend inference passed. The parent inspected the stopped dashboard and API proxy in a browser. A physical camera, participant accuracy, and Windows remain untested. See [observed results](../experiments-before-saturday.md#dashboard-implementation-observations).
+
+The user subsequently requested React with Bun on 2026-10-17. The dashboard now uses that stack with the same Python protocol and controls. [Migration observations](../experiments-before-saturday.md#react-and-bun-migration-observations) record the new interaction tests and browser checks.
 
 ## What starts recognition
 
@@ -60,7 +62,7 @@ The UI shows raw recognition separately from candidate, confirmation, and activa
 
 ## Code and data boundaries
 
-Keep the [existing package responsibilities](../project.md#package-responsibilities). `capture` owns input, `recognition` owns model adapters, `decisions` owns calibration and temporal command policy, `training` owns offline training/export, `api` connects Python to Vue, and `ui` owns interaction and display. A model adapter means a small module that converts a runtime's input/output into application observations while retaining model-specific fields.
+Keep the [existing package responsibilities](../project.md#package-responsibilities). `capture` owns input, `recognition` owns model adapters, `decisions` owns calibration and temporal command policy, `training` owns offline training/export, `api` connects Python to React, and `ui` owns interaction and display. A model adapter means a small module that converts a runtime's input/output into application observations while retaining model-specific fields.
 
 The CLI recognition JSON schema remains unchanged inside the dashboard envelope. The envelope adds session ID, frame ID, server capture timestamp, and mapping version, with the JPEG and its matching observations. Status includes model/runtime identity and bounded state events referring to frame/mapping IDs. Future decision-model outputs must retain their own meaning; do not treat blendshape measurements, option probabilities, and generated text as one universal confidence value.
 

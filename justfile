@@ -26,11 +26,11 @@ smoke-yolo-pose-executorch:
 
 # Install the locked UI dependencies.
 setup-ui:
-    pnpm --dir ui install --frozen-lockfile
+    bun install --cwd ui --frozen-lockfile
 
 # Start the UI development server; stop it with Ctrl+C.
 dev-ui:
-    pnpm --dir ui dev
+    bun run --cwd ui dev
 
 # Install MediaPipe dependencies alongside the Mac PyTorch environment.
 setup-vision:
@@ -55,17 +55,17 @@ recognize-camera:
 # Install the local dashboard API and recognition dependencies.
 setup-dashboard:
     uv sync --locked --extra pytorch --extra vision --extra dashboard
-    pnpm --dir ui install --frozen-lockfile
+    bun install --cwd ui --frozen-lockfile
 
 # Run the local camera API; use dev-ui in a second terminal.
 dev-api:
     uv run --locked --extra vision --extra dashboard python -m secondhands.api
 
-# Check Python behavior and the Vue transport, types, and build.
+# Check Python behavior and the React dashboard, transport, types, and build.
 test-dashboard:
     uv run --locked --extra vision --extra dashboard pytest -q
-    pnpm --dir ui test
-    pnpm --dir ui build
+    bun run --cwd ui test
+    bun run --cwd ui build
 
 # Explicit downloads use pinned revisions and separate dependency environments.
 download-model-samples:

@@ -4,6 +4,8 @@
 
 ## Framework roles
 
+The UI rows reflect the user-approved 2026-10-17 [React and Bun migration](../experiments-before-saturday.md#react-and-bun-migration-observations). It changes frontend tooling, not the Python inference runtimes.
+
 | Component | SecondHands role |
 | --- | --- |
 | Python | Camera processing, model integration, experiments, and the implemented FastAPI dashboard service. |
@@ -12,7 +14,8 @@
 | XNNPACK | ExecuTorch's optimized CPU backend; used for the first Mac check. |
 | Qualcomm QAIRT/QNN HTP | The hackathon's documented route from ExecuTorch to the Snapdragon Hexagon NPU. |
 | MediaPipe | The current face/hand recognition runtime. It does not run through PyTorch or ExecuTorch in our implementation. |
-| Vue 3, TypeScript, Vite | The implemented local recognition dashboard, with a Vite proxy to the Python service. |
+| React 19, TypeScript, Vite | The implemented local recognition dashboard, with a Vite proxy to the Python service. |
+| Bun 1.4.3 | UI dependency installation and execution of Vite, TypeScript, and Vitest. Verified on the Mac; Dell execution remains untested. |
 
 PyTorch is the model development framework; ExecuTorch is its on-device inference framework. We can use pretrained models without training them ourselves. The documented export and test workflow uses Python APIs, so the first Mac check needs no application C++ code. See [ExecuTorch getting started](https://docs.pytorch.org/executorch/1.5/getting-started.html).
 

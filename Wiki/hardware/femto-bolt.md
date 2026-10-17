@@ -1,6 +1,6 @@
 # Orbbec Femto Bolt
 
-**Status:** Selected external camera on 2026-10-17, replacing Orbbec Astra 2. First connect it to the x86 Windows laptop, then test it on the Dell Snapdragon PC. Neither connection has been verified by this project. Cam and Jacqueline own the hardware work requested by the user.
+**Status:** Selected external camera on 2026-10-17, replacing Orbbec Astra 2. The requested sequence was x86 Windows laptop first, then Dell Snapdragon. A subsequent [local Snapdragon bridge test](../setup/ms-09-femto-bolt-bridge.md) demonstrated depth capture and RGB/depth person positioning; the x86 reference test remains unverified. Sustained capture reliability and SecondHands integration remain open. Cam and Jacqueline own the hardware work requested by the user.
 
 ## Purpose and current implementation
 
@@ -8,7 +8,7 @@ Femto Bolt supplies color and depth images. RGB-D means a color image plus depth
 
 The first goal is reliable capture. Start with color images for the existing recognition models, then inspect depth separately. The built-in camera remains the working baseline while this external-camera path is tested.
 
-The repository has no Astra-specific capture implementation to move. Hardware references have been consolidated here and updated to Femto Bolt. The current [camera module](../../src/secondhands/capture/camera.py) uses OpenCV `VideoCapture` and returns RGB pixels. It does not expose Orbbec depth, camera calibration, or synchronized color/depth frames. Future device code belongs in `src/secondhands/capture/`; this page owns the setup procedure and findings.
+The repository has no Astra-specific capture implementation to move. Hardware references have been consolidated here and updated to Femto Bolt. The current [camera module](../../src/secondhands/capture/camera.py) uses OpenCV `VideoCapture` and returns RGB pixels. It does not expose Orbbec depth, camera calibration, or synchronized color/depth frames. Future device code belongs in `src/secondhands/capture/`; this page owns hardware compatibility and remaining checks. The [setup summary](../setup/ms-09-femto-bolt-bridge.md) owns the separate installed bridge's rationale, implementation, results, and launch procedure.
 
 ## Windows laptop test
 
@@ -34,16 +34,19 @@ Camera capture and neural-network execution are separate checks. A working camer
 
 ## Results to record
 
-For each machine, record the OS and process architecture, SDK/wrapper/firmware versions, connection and stream settings, color/depth results, restart behavior, and exact errors. State whether the evidence comes from Viewer, a Python example, or SecondHands. No hardware results are recorded yet. Work status belongs in [the task plan](../plan.md).
+For each machine, record the OS and process architecture, SDK/wrapper/firmware versions, connection and stream settings, color/depth results, restart behavior, and exact errors. State whether the evidence comes from Viewer, a Python example, or SecondHands. The [2026-10-17 bridge results](../setup/ms-09-femto-bolt-bridge.md#recorded-results) provide standalone Snapdragon evidence, including a later capture timeout. Viewer success, x86 reference results, and SecondHands integration remain unverified. Work status belongs in [the task plan](../plan.md).
 
 ## Questions
 
 ### SH-Q-002 — Which capture path works on the Dell?
 
-**Open technical investigation.** Femto Bolt is selected, but the inspected SDK does not publish Windows ARM64 binaries. Test the alternatives rather than selecting an unverified path from documentation alone.
+**Partially resolved on 2026-10-17.** The user's earlier setup request required operation entirely on this Snapdragon computer. The [saved bridge evidence](../setup/ms-09-femto-bolt-bridge.md#recorded-results) establishes a local capture path: direct Windows Kernel Streaming proxy capture, vendor depth decoding in an emulated x64 process, and a separate RGB/depth person application. Standard SDK capture failed. Initial start/stop checks passed, but a later run ended in a sensor-frame timeout; repeatable sustained capture, reconnect/reboot recovery, measured distance accuracy, and SecondHands integration remain unverified. This is an observed prototype result, not approval of a final application architecture or a claim of official Windows ARM64 SDK support.
+
+The original alternatives remain relevant for comparison:
 
 - **Native Windows ARM64 path, if available:** Obtain a supported driver, SDK, and wrapper for that architecture. Example: an ARM64 Python process captures both color and depth. No such package was verified in this review.
 - **Windows x64 application under emulation:** Test the available x64 Viewer and SDK on the Dell. Example: Viewer displays both streams, followed by an x64 Python capture test. Driver compatibility remains a separate condition.
 - **Built-in camera fallback:** Retain local RGB recognition if Femto Bolt capture cannot be established. Example: the [existing camera module](../../src/secondhands/capture/camera.py) supplies color frames, with no claim of depth support.
+- **Continue testing the local bridge:** Use the [installed viewer](../setup/ms-09-femto-bolt-bridge.md#how-to-use-the-installed-setup) to repeat sustained capture and recovery checks, and compare reported depth against measured targets. This already produces depth locally but needs custom application integration and has an unresolved timeout.
 
-Compare repeatable capture, timestamp behavior, application compatibility, and setup time. Use the first successful laptop test as the reference. Record the result here before calling the Dell path supported; link the outcome from [the plan](../plan.md#team-coordination).
+Compare repeatable capture, timestamp behavior, measured distance error, application compatibility, and setup time. Record the timeout's cause and recovery evidence before calling the Dell path reliable; link the outcome from [the plan](../plan.md#team-coordination). The earlier x86 reference procedure remains available to separate device faults from platform-specific behavior.

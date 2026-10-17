@@ -44,7 +44,7 @@ The hackathon demonstration is one guided session: the participant stands in fro
                                      FastAPI service + WebSocket  ──►  SQLite session store
                                             │ JSON messages
                                             ▼
-                                     Vue frontend: session view, skeleton overlay, progress
+                                     React frontend: session view, skeleton overlay, progress
  optional: heart-rate sensor (BLE or manual), Arduino sensors over serial, depth stream
 ```
 
@@ -137,7 +137,7 @@ Keypoints are normalized to the image, with a per-point confidence. `source` dis
 
 ### Frontend
 
-The `main` branch has a Vue 3, TypeScript, and Vite dashboard with a WebSocket transport, camera preview, and signal views ([UI package](../../ui/package.json)). On 2026-10-17 the unmerged branch `dm/react-ui` migrated that dashboard to React 19 with Bun as the package manager and runner, keeping Vite and Vitest ([branch commit](https://github.com/davidmoshal/SecondHands/commit/86989af15d978e6b94125e37c6d42dd4694b0c7c)). Treat React and Bun as the frontend direction once that branch merges, and build the tracker screens there rather than in the Vue code. The tracker adds a session screen with a skeleton overlay drawn on a canvas from the `pose` message, a large rep counter and phase indicator, a form-cue line, and a progress screen that charts `session_summary` records against the baseline. Whichever framework the frontend teammates finish in, the WebSocket contract above and the Vite-style proxy to `127.0.0.1:8765` are the only integration points; the Python service does not depend on the UI framework. Browser-side camera capture through `getUserMedia` is a documented fallback for Tier 1, where the browser sends JPEG frames over the same socket.
+The dashboard is now React 19, TypeScript, and Vite with Bun as the package manager and runner, merged to `main` on 2026-10-17 through [pull request #12](https://github.com/davidmoshal/SecondHands/pull/12) from the earlier Vue scaffold; it keeps the WebSocket transport, camera preview, and signal views ([UI package](../../ui/package.json)). The tracker adds a session screen with a skeleton overlay drawn on a canvas from the `pose` message, a large rep counter and phase indicator, a form-cue line, and a progress screen that charts `session_summary` records against the baseline. Whichever framework the frontend teammates finish in, the WebSocket contract above and the Vite-style proxy to `127.0.0.1:8765` are the only integration points; the Python service does not depend on the UI framework. Browser-side camera capture through `getUserMedia` is a documented fallback for Tier 1, where the browser sends JPEG frames over the same socket.
 
 ### Storage and privacy
 
@@ -155,7 +155,7 @@ SQLite through Python's standard library, one file under ignored `data/`, with t
 | --- | --- | --- |
 | Product requirements document | Target users, the five-step feature list, acceptance criteria, demo script | [What the product does](#what-the-product-does) supplies the feature-to-measurement table; acceptance criteria should name the rep-count accuracy and latency the demo must meet |
 | Technical design document | Component boundaries, data flow, error handling, test plan | [Architecture](#architecture), [layer decisions](#layer-decisions), and the [interface contract](#service-and-interface-contract); add sequence diagrams and failure cases there rather than here |
-| Frontend | Screens, state, visual design | [Frontend](#frontend) and the three message types; the React and Bun migration on `dm/react-ui` is the current direction; the frontend consumes, never computes, reps and scores |
+| Frontend | Screens, state, visual design | [Frontend](#frontend) and the three message types; React 19 with Bun is the merged frontend stack; the frontend consumes, never computes, reps and scores |
 | Hardware and camera setup | Which camera, cables, drivers, measured frame rate | [Sensing](#sensing), [SH-Q-006](#sh-q-006--which-camera-serves-the-demonstration), and the hardware pages |
 | Presentation | Story, evidence, judging criteria | The [judging weights](../hackathon/judging-criteria.md#scoring): use case and impact 40, technical 25, on-device efficiency 15, deployment and documentation 10, presentation 10. The efficiency points need Tier 2 profiler evidence or an honest CPU measurement |
 
@@ -196,7 +196,7 @@ Verified on 2026-10-17 by running the locked export check in a Linux x86-64 cont
 
 The alternatives considered before the decision are preserved here for the record. An extension within SecondHands would have kept the assistive story and added adapted exercises as a rehabilitation mode; a pivot makes the Mayo-style tracker the submission; two deliverables would have shared one stack. The user chose the pivot. The existing capture, service, trigger-engine, and dashboard code remain reusable, and [Kate's clinical application work](https://github.com/davidmoshal/SecondHands/issues/7) should be re-scoped to the tracker by its owner.
 
-Remaining follow-up, tracked as [SH-T-047](../plan.md#movement-tracker): update the proposal, README, index wording, and issue descriptions to the tracker, and retire or re-scope the assistive-only tasks. Use case and impact carries 40 of 100 judging points ([criteria](../hackathon/judging-criteria.md#scoring)), so the product requirements document should state the tracker's impact story explicitly.
+Remaining follow-up, tracked as [SH-T-048](../plan.md#movement-tracker): update the proposal, README, index wording, and issue descriptions to the tracker, and retire or re-scope the assistive-only tasks. Use case and impact carries 40 of 100 judging points ([criteria](../hackathon/judging-criteria.md#scoring)), so the product requirements document should state the tracker's impact story explicitly.
 
 ### SH-Q-006 — Which camera serves the demonstration?
 
