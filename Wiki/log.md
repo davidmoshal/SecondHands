@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Tailscale local install status recorded
+
+Added a [local installs table](references/tailscale.md#local-installs) to the Tailscale reference: the Dell laptop is reported installed, and the project owner's Mac was checked and has no Tailscale installation. The install steps stay in [the runbook](runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale). No connection was tested.
+
 ## 2026-10-17 — Candidate skeletal medical tests listed
 
 Added [ten candidate tests](requirements/skeletal-medical-tests.md) that a body-pose camera can time, count, or measure: one-leg stance, four-stage balance, Timed Up and Go, gait speed, two chair-stand tests, heel-to-toe walk, functional reach, active range of motion, and the two-minute step test. Linked the list from the index, [Project direction](project.md#established-user-direction), the [fitness-tracker scope](design/tech-stack.md#what-the-product-does), and the [field sobriety example](requirements/field-sobriety.md). Recorded source SH-S-026. No test was selected, implemented, or validated.
