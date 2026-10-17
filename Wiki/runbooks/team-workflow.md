@@ -1,6 +1,6 @@
 # Team workflow: project structure, separation of concerns, and the shared laptop
 
-**Status:** written on 2026-10-17 at the user's request so the team can work in parallel on one repository and one Snapdragon laptop reached over Tailscale. It owns the proposed code structure, the ownership boundaries, the laptop-sharing rules, and the model acquisition table. Commands for individual steps stay in [the Mac and Snapdragon runbook](mac-and-snapdragon-development.md); architecture stays in [the tech stack](../design/tech-stack.md); task status stays in [the plan](../plan.md#movement-tracker). Where this page says "proposed", the folder or rule does not exist yet.
+**Status:** written on 2026-10-17 at the user's request so the team can work in parallel on one repository and one Snapdragon laptop reached over Tailscale. It owns the proposed code structure, the ownership boundaries, the laptop-sharing rules, and the model acquisition table. Commands for individual steps stay in [the Mac and Snapdragon runbook](mac-and-snapdragon-development.md); architecture stays in [the tech stack](../design/tech-stack.md); task status stays in [the plan](../plan.md#dependencies-and-order). Where this page says "proposed", the folder or rule does not exist yet.
 
 ## Project structure
 
@@ -79,7 +79,7 @@ C:\sh\runs\<initials>\      each person's results, logs, and reports; nothing pe
 
 **The camera is exclusive.** Only one process can hold the camera, and only one pipeline should drive it at a time. Before starting anything that opens the camera, post "laptop camera: <who>, <what>, until <time>" in the team chat and clear it when done. Exports, unit tests, conversions, and documentation can run concurrently in other sessions because they do not touch the camera.
 
-**Ports.** Two things already claim port 8765: the SecondHands API in `src/secondhands/api` and Jacqueline's [depth bridge viewer](../setup/ms-09-femto-bolt-bridge.md#how-to-use-the-installed-setup). Do not run both at once until the API port is configurable (see [SH-T-059](../plan.md#movement-tracker)). Proposed plan:
+**Ports.** Two things already claim port 8765: the SecondHands API in `src/secondhands/api` and Jacqueline's [depth bridge viewer](../setup/ms-09-femto-bolt-bridge.md#how-to-use-the-installed-setup). Do not run both at once until the API port is configurable (see [SH-T-059](../plan.md#dependencies-and-order)). Proposed plan:
 
 | Port | Service | Notes |
 | --- | --- | --- |
@@ -119,4 +119,4 @@ Licences to keep in mind: Ultralytics weights and code are AGPL-3.0; RTMPose and
 
 ## Questions
 
-None open here. The port change is [SH-T-059](../plan.md#movement-tracker); laptop paths are confirmed by the steward when the environments are built ([SH-T-051](../plan.md#movement-tracker)).
+None open here. The port change is [SH-T-059](../plan.md#dependencies-and-order); laptop paths are confirmed by the steward when the environments are built ([SH-T-051](../plan.md#dependencies-and-order)).

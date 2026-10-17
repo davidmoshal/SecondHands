@@ -1,12 +1,132 @@
 # SecondHands plan
 
-Updated 2026-10-17 at the user's request. This is the single task tracker, organized by topic and phase. Checked tasks have implementation or verification evidence; their stated limits still apply. Unchecked tasks are remaining work or explicitly marked proposals, not blanket approval to implement every option.
+**Updated 2026-10-17, evening.** This is the single task tracker. The project is the on-device movement assessment tracker confirmed by the user on 2026-10-17; the assistive-control work that came first is kept at the end as the previous idea and as a reusable extension. Checked tasks have evidence; unchecked tasks are open work or marked proposals. Every engineering task below has a self-contained specification in [the implementation briefs](design/implementation-briefs.md) so a teammate or a coding agent can pick it up from a fresh checkout.
 
-Current position: all five starting candidates execute on the Mac. The two MediaPipe bundles feed the local exploration dashboard; Laya Vision, Mapika, and SmolVLM run as separate image experiments. Public-image inference and automated checks pass, but the image experiments expose false face classifications from Laya and SmolVLM. Physical-camera use through SecondHands, comparative accuracy, and Snapdragon execution of SecondHands remain unverified. A separate [local depth bridge and person application](setup/ms-09-femto-bolt-bridge.md) passed initial Snapdragon tests, with a later capture timeout still unresolved. Detailed application behavior stays in [the design](design/index.md), commands in [the runbook](runbooks/mac-and-snapdragon-development.md), and model results in [experiments](experiments-before-saturday.md).
+**Current position.** Verified: YOLO11n-pose exports to ExecuTorch 1.5.1 and matches PyTorch on the CPU; the React/Bun dashboard, the MediaPipe recognition, and the trigger engine run on the Mac; a local depth bridge captured Femto Bolt depth on the laptop; the laptop is on Tailscale. Not yet verified: any SecondHands code on the laptop, a camera choice, a protocol from the clinicians, the analysis engine, the tracker service and views, the NPU. Public prototypes and reference pages: [davidmoshal.github.io/SecondHands](https://davidmoshal.github.io/SecondHands/).
 
-## Team coordination
+## How to pick up work
 
-The user requested these GitHub work items on 2026-10-17. Use the issues for named team coordination and this plan for the detailed project checklist. Issue descriptions contain the requested owners; only confirmed GitHub accounts receive formal assignments.
+1. Choose an unchecked task in a workstream below. Say so in the team chat with the task identifier, so two people do not start the same one.
+2. Read the task's brief in [implementation briefs](design/implementation-briefs.md) and the pages it names. The brief is the specification; this plan is only the order and status.
+3. Branch `<initials>/<topic>`, keep to the brief's files and acceptance checks, run the tests the brief names, open a pull request against `main` that links the task identifier, and update the owning Wiki page plus [the log](log.md) in the same pull request.
+4. For a coding agent: give it the brief's heading, the repository, and the instruction to stop at the brief's acceptance checks. Briefs marked agent-friendly need no camera and no laptop. Review the agent's pull request like any other.
+5. The laptop is shared: follow [the team workflow](runbooks/team-workflow.md#sharing-the-one-snapdragon-laptop). Only Workstreams B, C2, G1, and G3 need it.
+
+Next free identifiers: task SH-T-069, question SH-Q-007, source SH-S-030. Check again before using them.
+
+## Dependencies and order
+
+```
+A protocols (clinicians) ──────────────────────────┐
+                                                   ▼
+C1 perception ──► D1 analysis ──► E1 service ──► F1 Home + Clinic views ──► H demo
+      │                ▲              ▲
+      │                └── D2 protocol loader
+      ├──► G1 recordings ──► G2 classifier ──► C2 NPU (with Qualcomm)
+      └──► B6 laptop Tier 0 ──► B7 camera ──► G3 benchmarks ──► H demo
+```
+
+C1, D1, D2, and E1 can be built and tested on any computer with a fake backend and synthetic traces; they do not wait for the laptop or the clinicians. F1 can start against the prototype's message shapes today. A changes numbers, not structure, so it can land any time before the rehearsal.
+
+## Timeline
+
+| When | Must be true | Workstreams |
+| --- | --- | --- |
+| Tonight (17 Oct) | Protocol drafts started; C1 perception module and D1 analysis in review; Tier 0 environment building on the laptop; recordings scheduled | A, B6, C1, D1 |
+| Sunday morning | Service streams the three messages against a fake backend; Home and Clinic views render them; camera chosen; first laptop fps numbers; handoff pack delivered to Qualcomm | B7, D2, E1, F1, C2 |
+| Sunday midday | Live session on the laptop end to end; recordings taken; classifier trained or declared out; benchmarks table filled | G1, G2, G3 |
+| Sunday afternoon | `main` frozen, rehearsal done, demo script final, evidence pages updated | H, I |
+| After the event | Phone build, skin-screening path, sobriety protocol, validation studies | later items below |
+
+## Workstream A · Clinical protocols
+
+**Owner: the clinicians; Kate coordinates.** Brief [A](design/implementation-briefs.md#a--protocol-definitions-clinicians).
+
+- [ ] **SH-T-057 — Define CS-30 and SLS-01.** Fill the [protocol template](use-cases.md#protocol-template) for the 30-second chair stand and the single-leg stance, including adapted variants and the demo acceptance criteria. Record on the use-cases page, then as JSON under `src/secondhands/protocols/` once SH-T-061 exists.
+- [ ] **SH-T-046 — Define the clinical application.** Kate owns [issue #7](https://github.com/davidmoshal/SecondHands/issues/7); now scoped to the tracker's clinical family and the demo story.
+- [ ] **SH-T-043 — Confirm the presentation lead.** Resolve [SH-Q-004](project.md#sh-q-004--presentation-lead); Kate remains proposed.
+
+## Workstream B · Laptop and environments
+
+**Owner: Vishwa (steward); camera tests with Cam and Jacqueline ([issue #2](https://github.com/davidmoshal/SecondHands/issues/2)).** Briefs [B6](design/implementation-briefs.md#b6--tier-0-environment-on-the-laptop) and [B7](design/implementation-briefs.md#b7--camera-selection).
+
+- [ ] **SH-T-036 — Verify Mac-to-laptop access over Tailscale.** A Mac SSH login, reconnection after restart, dashboard port forwarding, per [the runbook](runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale). [Issue #9](https://github.com/davidmoshal/SecondHands/issues/9).
+- [ ] **SH-T-051 — Stand up Tier 0 on the laptop.** x64 Python 3.12 from the lockfiles, `just smoke-yolo-pose-executorch`, then a 60-second live run; record fps, latency, memory; commit `scripts/laptop-setup.ps1`.
+- [ ] **SH-T-049 — Select the demonstration camera.** One measured test per camera; resolve [SH-Q-006](design/tech-stack.md#sh-q-006--which-camera-serves-the-demonstration). Supersedes SH-T-041 for the tracker.
+- [ ] **SH-T-059 — Make the API port configurable.** `SECONDHANDS_API_PORT` and the Vite proxy; the depth-bridge viewer also uses 8765. Record the port table in [the team workflow](runbooks/team-workflow.md#sharing-the-one-snapdragon-laptop).
+- [ ] **SH-T-001 — Record the laptop configuration and event details.** RAM, Windows build, installed QAIRT and ExecuTorch versions, bundle location, remaining organizer questions on [the laptop page](hardware/snapdragon-x-elite.md).
+- [ ] **SH-T-009 — Run the supplied DeepLabV3 bundle.** Keep the profiler evidence; it is the reference for the NPU runner in C2.
+
+## Workstream C · Perception and the NPU
+
+**Owner: Vishwa, with the Qualcomm engineer.** Briefs [C1](design/implementation-briefs.md#c1--perception-module-and-executorch-xnnpack-backend) (agent-friendly) and [C2](design/implementation-briefs.md#c2--qnn-backend-client-and-the-qualcomm-handoff).
+
+- [x] **SH-T-050 — Export a pose model to ExecuTorch and validate it.** `just smoke-yolo-pose-executorch`: 11.7 MB XNNPACK `.pte`, matches PyTorch within 3.3e-3 ([observation](experiments-before-saturday.md#yolo-pose-executorch-export-observation)).
+- [ ] **SH-T-060 — Build the perception module.** `perception/base.py` interface and `Keypoints` type, the ExecuTorch XNNPACK backend with YOLO pose decoding, the MediaPipe fallback stub, `just recognize-pose`, tests against a saved reference.
+- [ ] **SH-T-056 — Hand RTMPose and the classifier to the Qualcomm engineer.** Deliver the [handoff pack](references/models/pose-candidates.md#handoff-pack-for-the-qualcomm-engineer); record the returned `.pte`, runner build, delegation profile, CPU-fallback operators, and keypoint error; then `perception/executorch_qnn.py`.
+- [ ] **SH-T-035 — A useful component through ExecuTorch on the device.** Satisfied for the CPU once SH-T-051 runs the perception module live; the NPU half is SH-T-056.
+
+## Workstream D · Analysis engine
+
+**Owner: engineers; thresholds from Workstream A.** Briefs [D1](design/implementation-briefs.md#d1--analysis-angles-rep-counter-scorers) and [D2](design/implementation-briefs.md#d2--protocol-schema-and-loader), both agent-friendly.
+
+- [ ] **SH-T-052 — Angles, rep counters, and scorers.** `analysis/angles.py`, `reps.py` (sit-to-stand and squat hysteresis state machines emitting contract `rep_event`s), `scorers.py` (CS-30, SLS-01), `session.py`; synthetic-trace tests; `just replay-keypoints`.
+- [ ] **SH-T-061 — Protocol schema, loader, and the two JSON files.** Validation with clear errors, overrides for Clinic-view threshold edits, `just validate-protocols`; files marked draft until Workstream A supplies values.
+
+## Workstream E · Service and storage
+
+**Owner: first of Vishwa or David to claim it.** Brief [E1](design/implementation-briefs.md#e1--tracker-session-in-the-service-sessions-api-storage), agent-friendly given C1 and D1.
+
+- [ ] **SH-T-063 — Tracker session in the API.** Control messages, the three streamed messages, one camera owner, invalidation on protocol change, fake-backend tests.
+- [ ] **SH-T-062 — SQLite storage and sessions endpoints.** Participants by role label, baselines, sessions, rep events; `GET /api/sessions`, detail, export.
+
+## Workstream F · Frontend
+
+**Owner: David.** Brief [F1](design/implementation-briefs.md#f1--home-and-clinic-views).
+
+- [ ] **SH-T-054 — Home and Clinic views.** Per the [Companion prototype](https://davidmoshal.github.io/SecondHands/companion.html): Home with one instruction at a time and no numbers, Clinic with overlays, measurements, flags, threshold editor, baseline comparison, notes; mode switch; runtime badge; preferences; transport and mapping tests.
+- [ ] **SH-T-013 — Demonstration interface polish.** Measured capture-to-display latency shown in the Clinic view; replaces the earlier assistive scope of this task.
+
+## Workstream G · Data, validation, and benchmarks
+
+**Owner: engineers; two consenting team members for recordings.** Briefs [G1](design/implementation-briefs.md#g1--recording-and-labelling-tools), [G2](design/implementation-briefs.md#g2--window-classifier), [G3](design/implementation-briefs.md#g3--benchmarks-and-evidence).
+
+- [ ] **SH-T-064 — Recording and labelling tools, and the recordings.** `just record-keypoints`, `just label-reps`; chair stands and single-leg stance from two people; about 100 calibration frames; all under ignored `data/`.
+- [ ] **SH-T-053 — Train and export the window classifier.** Held-out accuracy and agreement with the rule counter; XNNPACK export; Qualcomm export attempt; adapter emitting `source: "classifier"`.
+- [ ] **SH-T-065 — Benchmarks and evidence.** `experiments/benchmark_pose.py`; latency, fps, keypoint error, memory, sustained run per backend and tier; NPU evidence from C2; table on [the experiments page](experiments-before-saturday.md).
+- [ ] **SH-T-011 — Validate against the reference instruments.** Stopwatch and clinician count agreement for one session per protocol, against the acceptance criteria from Workstream A. Replaces the earlier two-participant calibration scope.
+
+## Workstream H · Demonstration and presentation
+
+**Owner: Kate (proposed) with everyone's evidence.** Brief [H](design/implementation-briefs.md#h--demonstration-script-and-presentation).
+
+- [ ] **SH-T-002 — Agree the demonstration and acceptance criteria.** Participant, the two protocols, screens, success and failure behaviour, from Workstream A's criteria.
+- [ ] **SH-T-015 — Demo script, presentation, and evidence.** `Wiki/hackathon/demo-script.md` against [the judging weights](hackathon/judging-criteria.md#scoring); only claims that have run. [Issue #5](https://github.com/davidmoshal/SecondHands/issues/5).
+- [ ] **SH-T-014 — Rehearse on the frozen `main`.** On the laptop, over the chosen camera, both views; record what went wrong.
+
+## Workstream I · Documentation and Pages
+
+**Owner: Vishwa; anyone may contribute.** Brief [I](design/implementation-briefs.md#i--documentation-sync).
+
+- [ ] **SH-T-048 — Update the Wiki, README, proposal, and issues to the tracker direction.** Keep the assistive story as an extension; update [issues #1 to #7](https://github.com/davidmoshal/SecondHands/issues) descriptions.
+- [ ] **SH-T-055 — Link the teammates' documents.** PRD, TDD, frontend document, from [the document map](design/tech-stack.md#document-map-for-the-team) and the index.
+- [ ] **SH-T-042 — Confirm GitHub owner accounts.** Resolve [SH-Q-003](project.md#sh-q-003--github-accounts-for-the-named-owners) so the remaining owners can be assigned.
+- [ ] **SH-T-034 — Expand the design documentation.** Now covered by the tech stack, briefs, and team workflow pages; close by linking them from [the design index](design/index.md) and removing the stale proposal list.
+
+## Later
+
+- [ ] **SH-T-058 — Assess the skin-screening model path.** After the movement demonstration is stable; privacy design first.
+- [ ] **SH-T-066 — Phone build feasibility.** Re-export the pose model for a Snapdragon phone chipset with the Qualcomm backend, an Android shell around the ExecuTorch runtime, the same protocol files; record what changes.
+- [ ] **SH-T-067 — Field sobriety protocol draft.** Walk-and-turn and one-leg-stand clues from [the requirement page](requirements/field-sobriety.md), with the legal and validation conditions stated before any implementation.
+- [ ] **SH-T-038 — Phone camera over Wi-Fi.** Input compatibility, latency, disconnects.
+
+## Previous idea: assistive control
+
+The tasks below belong to the gesture-control proposal that preceded the tracker. Their code and evidence are reused (capture, trigger engine, dashboard, model experiments). Unchecked items are retained for the extension; none is required for the hackathon demonstration unless listed in a workstream above.
+
+### Team coordination
+
+The GitHub issues below were created for the previous idea on 2026-10-17 and remain the team's named coordination points until SH-T-048 updates them. The workstreams above are the current checklist. Issue descriptions contain the requested owners; only confirmed GitHub accounts receive formal assignments.
 
 | Workstream | GitHub issue |
 | --- | --- |
@@ -20,11 +140,8 @@ The user requested these GitHub work items on 2026-10-17. Use the issues for nam
 | Laptop remote access | [Set up Tailscale — Vishwa](https://github.com/davidmoshal/SecondHands/issues/9) |
 
 - [ ] **SH-T-041 — Resolve the Dell camera path.** [SH-Q-002](hardware/femto-bolt.md#sh-q-002--which-capture-path-works-on-the-dell) is partially resolved by the local bridge. Record sustained capture, timeout diagnosis, reconnect/reboot recovery, measured distance accuracy, and application integration evidence before closing the remaining scope.
-- [ ] **SH-T-042 — Confirm GitHub owner accounts.** Resolve [SH-Q-003](project.md#sh-q-003--github-accounts-for-the-named-owners) before assigning unverified accounts or changing repository access.
-- [ ] **SH-T-043 — Confirm the presentation lead.** Resolve [SH-Q-004](project.md#sh-q-004--presentation-lead); Kate remains proposed.
-- [ ] **SH-T-046 — Define the clinical application.** Kate owns [issue #7](https://github.com/davidmoshal/SecondHands/issues/7). Record the intended application and agreed requirements, then connect them to model evaluation, UI, and demonstration work. [Project direction](project.md#established-user-direction) records the confirmed role; presentation ownership remains separate.
 
-## Project setup
+### Project setup
 
 **Phase 1: Mac foundation.**
 
@@ -32,22 +149,22 @@ The user requested these GitHub work items on 2026-10-17. Use the issues for nam
 - [x] **SH-T-021 — Add just commands.** Setup, model download, image/camera inference, dashboard services, tests, and the ExecuTorch smoke check are exposed through the [justfile](../justfile).
 - [x] **SH-T-020 — Document shared Mac/PC development.** [The runbook](runbooks/mac-and-snapdragon-development.md) covers separate environments, Git synchronization, T3 execution context, and known Windows dependency limits. Remote connection and PC execution remain untested.
 
-## Models
+### Models
 
 **Phase 2: establish about five runnable candidates on the Mac before porting.** The first completed baseline below contains two recognition bundles; the other three are separate integrations. A compatibility blocker must be recorded and does not count as a working model.
 
-### Reference review
+#### Reference review
 
 - [x] **SH-T-019 — Record model references.** [The model index](references/models/index.md) contains the top five, individual detail pages, and other retained candidates from the captured chats.
 
-### Mac integrations
+#### Mac integrations
 
 - [x] **SH-T-023 — Integrate MediaPipe Face Landmarker and Gesture Recognizer.** Both run on public sample images, with checked downloads, structured results, image/camera CLIs, and dashboard integration. [Observed results](experiments-before-saturday.md#mediapipe-baseline-observations); physical-camera use and participant accuracy remain untested.
 - [x] **SH-T-026 — Integrate Laya Vision 201M.** The isolated CLI loads pinned weights, answers configurable image questions on Mac MPS and CPU, and records runtime, latency, memory, and failures. [Observed results](experiments-before-saturday.md#decision-model-image-observations) include an incorrect face classification. Dashboard integration and participant accuracy remain open.
 - [x] **SH-T-027 — Integrate Mapika Decider 2B Vision.** The isolated CLI runs pinned weights on Mac MPS, with its MPS patch active. [The same image questions](experiments-before-saturday.md#decision-model-image-observations) establish output and cost differences from Laya; the participant benchmark, dashboard integration, and Windows path remain unverified.
 - [x] **SH-T-028 — Integrate SmolVLM-500M-Instruct locally.** The isolated CLI executes pinned weights on Mac MPS and records image-conditioned text, runtime, latency, and memory. [Observed results](experiments-before-saturday.md#decision-model-image-observations) include an incorrect face classification. Generated text is not a typed decision score; dashboard integration and an ExecuTorch port remain separate work.
 
-## Recognition features
+### Recognition features
 
 **Phase 3: turn observations into configurable command experiments.** Implemented features below are deterministic logic over MediaPipe measurements, not validated intention recognition.
 
@@ -57,28 +174,24 @@ The user requested these GitHub work items on 2026-10-17. Use the issues for nam
 - [ ] **SH-T-040 — Connect a decision model to candidate events.** Supply selected images, context, and configurable choices after a possible command is detected. Bound outstanding requests and reject expired decisions; do not require a large model on every frame.
 - [ ] **SH-T-032 — Investigate independent face/hand thresholds.** Proposed improvement: current mappings share one activation/release pair, so applying one modality's calibration replaces that pair for both cues.
 - [ ] **SH-T-033 — Add temporal movement experiments.** After selecting a movement such as nodding, test observations over time. MediaPipe video tracking alone does not implement movement-sequence recognition.
-- [ ] **SH-T-011 — Validate personalized calibration with two participants.** The generic calibration flow exists; still demonstrate distinct usable movements mapped to the same action, against agreed criteria.
 
-## UI
+### UI
 
 **Phase 4: let the team inspect capabilities and try command mappings.**
 
 - [x] **SH-T-047 — Migrate the dashboard to React and Bun.** Completed the user-requested [issue #11](https://github.com/davidmoshal/SecondHands/issues/11) implementation with the same Python API, controls, and layout. Bun replaces pnpm; [verification](experiments-before-saturday.md#react-and-bun-migration-observations) covers locked installation, interaction tests, types, build, and stopped browser checks. Windows execution remains part of SH-T-010.
 - [x] **SH-T-025 — Implement the live exploration dashboard.** The dashboard connects to the Python service and displays matched preview/landmarks, facial blendshapes, hand categories, timings, mapping controls, calibration, bounded history, and a simulated lamp. Comparison freezes existing MediaPipe results; three unintegrated candidates are labeled honestly. [Verification](experiments-before-saturday.md#dashboard-implementation-observations).
 - [ ] **SH-T-003 — Verify the physical Mac camera and live dashboard.** Start capture, inspect real face/hand output, exercise mappings, and check Stop/restart. Public-image and mocked-camera checks do not complete this task.
-- [ ] **SH-T-013 — Complete the demonstration interface.** Extend the working dashboard to show the actual selected action/device state and measured capture-to-action latency. Current task/frame timings exclude transport, display, and physical response.
 - [ ] **SH-T-044 — Build and connect the 3D room simulation.** Under [issue #6](https://github.com/davidmoshal/SecondHands/issues/6), David and Vishwa will make an accepted gesture or facial command change a light in a browser-based room. Follow [the approved direction](project.md#established-user-direction); confirm the command/state connection and demonstrate the response. No implementation is complete yet.
 - [ ] **SH-T-045 — Try optional Quest 2 viewing through WebXR.** Use the same room as a web experience, without an Android SDK. Record headset/browser compatibility, connection setup, and whether the selected movement remains observable when the participant wears the headset. Keep ordinary browser viewing available. Coordinate through [issue #6](https://github.com/davidmoshal/SecondHands/issues/6).
 
-## Design and ExecuTorch
+### Design and ExecuTorch
 
 **Phase 5: document boundaries and establish useful framework execution.**
 
 - [x] **SH-T-024 — Document the initial design and run ExecuTorch on the Mac.** [Design docs](design/index.md) exist. ExecuTorch 1.5.1 exported and executed an untrained XNNPACK CPU network with outputs matching PyTorch on 12 synthetic inputs. [Smoke result](experiments-before-saturday.md#executorch-cpu-smoke-observation); this is not a recognition model.
-- [ ] **SH-T-034 — Expand the design documentation.** Proposed follow-ups: `architecture.md` for component/data boundaries, `model-integration.md` for adding candidates, and `dashboard.md` for exploration flows. Move existing owned explanations when splitting; do not duplicate them. These files are not yet created.
-- [ ] **SH-T-035 — Run a useful SecondHands component through ExecuTorch.** Select a recognition or decision component, validate its outputs against its source runtime, and connect it to the application. CPU execution and Qualcomm NPU execution need separate evidence.
 
-## Comparison and selection
+### Comparison and selection
 
 **Phase 6: measure the candidates on relevant observations.** [The experiment topic](experiments-before-saturday.md) owns methods and results. Its older Laya/Mapika/MobileCLIP2 benchmark remains a proposal; the five-candidate integration goal above is the newer direction.
 
@@ -87,49 +200,25 @@ The user requested these GitHub work items on 2026-10-17. Use the issues for nam
 - [ ] **SH-T-006 — Run the Mac comparison.** Record accuracy, false activations, abstention, median/p95 latency, memory, calibration effort, and configurability. Smoke tests are not these measurements.
 - [ ] **SH-T-007 — Select the initial integration candidate.** Record the choice and evidence under [SH-Q-001](project.md#sh-q-001--model-and-runtime-selection), including licensing and remaining PC checks.
 
-## Snapdragon deployment
+### Snapdragon deployment
 
 **Phase 7: verify the actual hackathon PC.** [The Compute summary](hackathon-compute.md) owns the supplied stack and unresolved event details. Mac success does not establish Windows ARM64 or NPU compatibility.
 
-- [ ] **SH-T-001 — Confirm device configuration and event details.** The guide review is complete; the [deployment laptop's reported X1E80100 processor and observed Windows version](hardware/snapdragon-x-elite.md) are recorded. Actual RAM, exact laptop model, installed deployment runtimes, bundle location, mixed-runtime acceptance, and other organizer details remain open.
-- [ ] **SH-T-036 — Verify Mac-to-PC development access.** Vishwa (@theja2289) owns [Tailscale setup on the Dell Snapdragon laptop](https://github.com/davidmoshal/SecondHands/issues/9). Tailscale is reported installed with MagicDNS name `qcworkshop27.tail2122cc.ts.net`; [the runbook](runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale) now gives the Windows OpenSSH Server setup, Mac connection, and dashboard port-forwarding procedure. Still to verify: a Mac SSH login, reconnection after restart, and that commands use the PC checkout and environment.
-- [ ] **SH-T-009 — Run the supplied DeepLabV3 ExecuTorch demonstration.** Inspect real inputs and rendered outputs; retain profiling evidence before claiming Qualcomm NPU execution.
 - [ ] **SH-T-010 — Run SecondHands on the PC.** Verify dependencies, camera, selected models, dashboard, output quality, latency, and memory. Record blockers and revise the provisional model choice if necessary.
 
-## Physical demonstration
+### Physical demonstration
 
 **Phase 8: connect the validated interaction to an actual object.** This remains separate from the implemented virtual lamp.
 
-- [ ] **SH-T-002 — Agree demonstration behavior and acceptance criteria.** Choose the object, participants' movements, confirmation/failure behavior, response targets, and acceptable false activations.
 - [ ] **SH-T-008 — Test physical control manually.** Verify the selected microcontroller/actuator independently of recognition.
 - [ ] **SH-T-012 — Connect recognition to the physical action.** Exercise deliberate, neutral, ambiguous, and failed-input cases against the agreed behavior.
-- [ ] **SH-T-014 — Rehearse the two-participant demonstration.** Verify personalized mappings, physical response, target-PC operation, and local processing.
-- [ ] **SH-T-015 — Prepare presentation and evidence.** Address the [five judging criteria](hackathon/judging-criteria.md#scoring). Separate demonstrated behavior, measured results, the actual ExecuTorch contribution, and future proposals.
 
-## Movement tracker
-
-**Phase 9: camera-based fitness tracker on the Snapdragon laptop. This is the current project direction**, confirmed by the user on 2026-10-17; [the tech stack page](design/tech-stack.md) owns the stack, tiers, and interface contract. The assistive-control phases above describe the previous idea until SH-T-048 updates them; reuse their code and evidence where it fits.
-
-- [ ] **SH-T-048 — Update the Wiki to the tracker direction.** [SH-Q-005](design/tech-stack.md#sh-q-005--how-does-the-movement-tracker-relate-to-secondhands) is resolved: the user confirmed on 2026-10-17 that the fitness tracker is the project. Update the proposal, README, index wording, and issue descriptions, re-scope or retire the assistive-only tasks below, and link the requirements document and demo script when they exist.
-- [ ] **SH-T-049 — Select and test the demonstration camera.** Resolve [SH-Q-006](design/tech-stack.md#sh-q-006--which-camera-serves-the-demonstration) with one capture test per available camera on the Dell; record frame rate and the x64-versus-ARM64 process used.
-- [x] **SH-T-050 — Export a pose model to ExecuTorch and validate it.** `just smoke-yolo-pose-executorch` exported YOLO11n-pose to an 11.7 MB XNNPACK `.pte` with ExecuTorch 1.5.1 and matched PyTorch on an identical input in a Linux x86-64 container. [Observation](experiments-before-saturday.md#yolo-pose-executorch-export-observation); Mac, laptop, exercise-image, and NPU evidence remain open under SH-T-051 and SH-T-053.
-- [ ] **SH-T-051 — Stand up Tier 0 on the laptop.** Install x64 Python 3.12 under emulation with the [checked package set](design/tech-stack.md#runtime-on-the-snapdragon-laptop), run the `.pte` on live frames, and record frames per second, latency, and memory.
-- [ ] **SH-T-052 — Implement angle-based rep counting and the session service.** Joint angles, squat and push-up state machines, `pose`, `rep_event`, and `session_summary` messages per [the interface contract](design/tech-stack.md#service-and-interface-contract), and SQLite session storage. Test with recorded clips kept outside Git.
-- [ ] **SH-T-053 — Train and export the window classifier.** Record a small labeled set, train the keypoint-window classifier, export it with XNNPACK, then attempt the Qualcomm backend export with 8-bit quantization and record delegation evidence. The deterministic counter remains the demo path if this is incomplete.
-- [ ] **SH-T-054 — Build the session and progress screens.** Skeleton overlay, rep counter, form cues, and baseline comparison from the contract messages; coordinate with the frontend teammates' chosen framework.
-- [ ] **SH-T-056 — Hand RTMPose and the window classifier to the Qualcomm engineer.** Assemble the [handoff pack](references/models/pose-candidates.md#handoff-pack-for-the-qualcomm-engineer): PyTorch module and weights, input contract, calibration frames, reference outputs. Record the returned `.pte`, delegation profile, latency, and CPU-fallback operators on the candidates page. Keep the YOLO CPU path as the demo until the NPU result is verified.
-- [ ] **SH-T-057 — Clinicians define the demonstration protocols.** Fill the [protocol template](use-cases.md#protocol-template) for two tests with instructions, phases, metrics, thresholds, report content, reference instrument, and agreement target; record them on the use-cases page or in a `protocols/` folder once the engine reads JSON. The engine's rules and screens follow from these.
-- [ ] **SH-T-058 — Assess the skin-screening model path.** Identify an open lesion detection or segmentation model that exports to ExecuTorch, its licence, and a public dermatology dataset for demonstration; record the privacy design (on-device only, encrypted at rest, no participant images). Later-phase work; do not schedule before the movement demonstration is stable.
-- [ ] **SH-T-059 — Make the API port configurable and settle the laptop port plan.** The SecondHands API and the Femto Bolt depth bridge viewer both use 8765. Add a `SECONDHANDS_API_PORT` setting (default 8765) and the matching Vite proxy setting, then record the agreed port table in [the team workflow](runbooks/team-workflow.md#sharing-the-one-snapdragon-laptop).
-- [ ] **SH-T-055 — Link the teammates' documents.** When the requirements, design, and frontend documents exist, link them from [the document map](design/tech-stack.md#document-map-for-the-team) and [the index](index.md).
-
-## Optional experiments
+### Optional experiments
 
 These remain outside the initial completion requirement; record results in [experiments](experiments-before-saturday.md).
 
 - [ ] **SH-T-017 — Investigate SmolVLM's Qualcomm ExecuTorch path.** Verify the recipe/version/Windows route before porting. The cited Android recipe is not a ready-made Compute PC package.
 - [ ] **SH-T-016 — Evaluate Clef-Flash as a higher-level decision layer.** Subject to memory and runtime feasibility; it remains deferred, not excluded.
-- [x] **SH-T-047 — Record the local Snapdragon depth bridge setup.** The [setup summary](setup/ms-09-femto-bolt-bridge.md) records the failed SDK route, successful depth/person verification, launch instructions, and later timeout from saved evidence. Applications and private captures remain outside this repository; no fresh camera test or SecondHands integration is claimed.
+- [x] **SH-T-068 — Record the local Snapdragon depth bridge setup.** (Renumbered from a second SH-T-047 on 2026-10-17.) The [setup summary](setup/ms-09-femto-bolt-bridge.md) records the failed SDK route, successful depth/person verification, launch instructions, and later timeout from saved evidence. Applications and private captures remain outside this repository; no fresh camera test or SecondHands integration is claimed.
 - [ ] **SH-T-037 — Connect Orbbec Femto Bolt.** The [hardware procedure](hardware/femto-bolt.md) now links successful standalone Snapdragon bridge tests. The originally requested x86 reference test, sustained reliability, measured accuracy, and SecondHands integration remain open. Record driver, Viewer, Python, and application results separately. This replaces the Astra 2 hardware task.
-- [ ] **SH-T-038 — Try a phone camera over Wi-Fi.** Verify input compatibility, latency, and disconnect behavior.
 - [ ] **SH-T-039 — Explore audio recognition.** Select a useful audio interaction and candidate model if time permits; none is implemented yet.
