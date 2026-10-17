@@ -45,6 +45,10 @@ The contract between layers is data, not code. A person working in one row never
 
 Interfaces to hold fixed this weekend: the `pose`, `rep_event`, and `session_summary` message fields in [the tech stack](../design/tech-stack.md#service-and-interface-contract); the perception interface `infer(frame) -> keypoints` so backends swap without touching analysis; and the protocol JSON shape shown in [the console prototype](https://claude.ai/artifact/CQdDefYFJcuS6qYVJN4K9B). Extend fields, never rename them.
 
+## Prototypes and reference pages on GitHub Pages
+
+The `docs/` folder holds standalone copies of the interactive prototypes and reference pages, and `.github/workflows/pages.yml` publishes that folder to GitHub Pages on every push to `main` that touches it. The site address is `https://davidmoshal.github.io/SecondHands/`. Publishing needs a one-time repository setting that only the owner can change: Settings, Pages, Build and deployment, Source set to **GitHub Actions**. Until that is done the workflow run fails with a Pages-not-enabled error and the files are still viewable by opening them from the repository. When a prototype changes, regenerate its `docs/` copy in the same pull request so the published page and the Wiki link stay in step.
+
 ## How we collaborate in Git
 
 1. Work on your own machine on a branch named `<initials>/<topic>`, for example `dm/session-screen` or `vp/qnn-backend`. Keep branches small and short-lived.

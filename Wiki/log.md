@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Prototypes published through GitHub Pages
+
+Added a `docs/` folder with standalone copies of the Companion, clinic console, architecture, brief, and team workflow pages plus an index, and a GitHub Actions workflow that deploys it to GitHub Pages from `main`. Recorded the site address and the owner-only Pages setting in [the team workflow](runbooks/team-workflow.md#prototypes-and-reference-pages-on-github-pages) and linked the site from [the index](index.md).
+
 ## 2026-10-17 — Two-mode Companion prototype linked
 
 Published and linked a second prototype with a Home view for older adults (chair stand, large type, one instruction at a time, read-aloud, contrast, break button, weekly dots) and a Clinic view for clinicians (overlays, rise time, trunk lean, knee extension, symmetry, flags against editable thresholds, baseline comparison, notes), both driven by one simulated sit-to-stand engine with the hip-height and knee-angle rule. Linked from [use cases](use-cases.md) and [the tech stack frontend section](design/tech-stack.md#frontend). The person and camera are drawn, not real footage.

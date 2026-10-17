@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SecondHands Team Workflow</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one reading column; a tree, a layer diagram, a laptop diagram, and tables. */
+  :root {
+    --bg: #f6f7f4; --surface: #ffffff; --fg: #1b2420; --muted: #5c6a63; --line: #d5dcd6;
+    --accent: #0f6e63; --accent-soft: #d9ece8; --warn: #a35a00; --warn-soft: #f6e8d2;
+    --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #141917; --surface: #1c2320; --fg: #e6ebe7; --muted: #9fb0a7; --line: #2f3a35; --accent: #5fc4b4; --accent-soft: #1b3b36; --warn: #e3a44a; --warn-soft: #3a2c15; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #141917; --surface: #1c2320; --fg: #e6ebe7; --muted: #9fb0a7; --line: #2f3a35; --accent: #5fc4b4; --accent-soft: #1b3b36; --warn: #e3a44a; --warn-soft: #3a2c15; color-scheme: dark; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; }
+  main { max-width: 980px; margin: 0 auto; display: grid; gap: 44px; }
+  h1, h2, h3 { text-wrap: balance; line-height: 1.2; margin: 0; }
+  h1 { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 600; } h2 { font-size: 1.35rem; font-weight: 600; } h3 { font-size: 1.02rem; font-weight: 600; }
+  p { margin: 0; max-width: 72ch; } .lede { color: var(--muted); font-size: 1.05rem; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  header, section { display: grid; gap: 16px; }
+  figure { margin: 0; display: grid; gap: 10px; } .frame { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); padding: 12px; }
+  svg { display: block; max-width: 100%; height: auto; font-family: var(--font-body); } .wide svg { min-width: 680px; }
+  figcaption { color: var(--muted); font-size: 0.92rem; max-width: 72ch; }
+  pre { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.5; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; overflow-x: auto; margin: 0; }
+  pre .c { color: var(--muted); } pre .p { color: var(--warn); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; } th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { font-weight: 600; color: var(--muted); font-size: 0.76rem; letter-spacing: 0.04em; text-transform: uppercase; } td:first-child { font-weight: 500; }
+  .pill { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; padding: 1px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; } .pill.warn { background: var(--warn-soft); color: var(--warn); } .pill.plain { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+  ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; max-width: 72ch; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; } .cols > div { min-width: 0; display: grid; gap: 8px; align-content: start; }
+  .note { border-left: 3px solid var(--warn); padding: 8px 12px; background: var(--warn-soft); border-radius: 0 6px 6px 0; font-size: 0.95rem; max-width: 72ch; }
+  footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 16px; } a { color: var(--accent); }
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+<main>
+  <header>
+    <div class="eyebrow">SecondHands · how we work this weekend</div>
+    <h1>SecondHands Team Workflow</h1>
+    <p class="lede">Six people, one repository, one Snapdragon laptop on Tailscale. This page says which folder each person owns, what passes between layers, how the laptop is shared without stepping on each other, and where every model comes from. The Wiki page <code>Wiki/runbooks/team-workflow.md</code> is the source of truth.</p>
+  </header>
+
+  <section>
+    <div class="eyebrow">1 · Structure</div>
+    <h2>Where things live</h2>
+<pre>SecondHands/
+├── AGENTS.md, CLAUDE.md        <span class="c">governance; read first</span>
+├── justfile                    <span class="c">every command the team runs</span>
+├── src/secondhands/
+│   ├── capture/                <span class="c">camera sources (OpenCV UVC today)</span>
+│   ├── perception/   <span class="p">proposed</span>  <span class="c">pose backends behind one interface: executorch_xnnpack · executorch_qnn · mediapipe</span>
+│   ├── analysis/     <span class="p">proposed</span>  <span class="c">angles, rep state machines, test scorers, protocol loader</span>
+│   ├── protocols/    <span class="p">proposed</span>  <span class="c">clinician JSON files, one per test</span>
+│   ├── storage/      <span class="p">proposed</span>  <span class="c">SQLite sessions, baselines, reports</span>
+│   ├── api/                    <span class="c">FastAPI loopback service, WebSocket session</span>
+│   ├── recognition/, decisions/ <span class="c">assistive control (retained; same hysteresis pattern)</span>
+│   └── training/               <span class="c">window-classifier training</span>
+├── ui/                         <span class="c">React 19 · TypeScript · Vite · Bun</span>
+├── experiments/                <span class="c">one script per experiment with its own lock; never imported by src</span>
+├── tests/                      <span class="c">pytest; mocked camera; model tests opt in</span>
+├── Wiki/                       <span class="c">knowledge; plan.md is the only task list</span>
+└── artifacts/, data/  (ignored) <span class="c">models, .pte files, recordings, SQLite — never committed</span></pre>
+  </section>
+
+  <section>
+    <div class="eyebrow">2 · Separation of concerns</div>
+    <h2>What passes between layers, and who owns each</h2>
+    <figure class="wide">
+      <div class="frame">
+        <svg viewBox="0 0 940 250" role="img" aria-label="Six layers in a row with their owners: capture (Cam and Jacqueline) emits RGB frames; perception (Vishwa and the Qualcomm engineer) emits keypoints; analysis (engineers with clinicians) emits rep events and scores; protocols (clinicians) feed analysis as JSON; the service (Vishwa and David) emits the message stream; the frontend (David) emits control messages back." style="color: var(--fg)">
+          <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+          <g font-size="11">
+            <rect x="20" y="60" width="140" height="74" rx="5" fill="var(--surface)" stroke="currentColor"/><text x="90" y="84" text-anchor="middle" font-weight="600" fill="currentColor">Capture</text><text x="90" y="102" text-anchor="middle" fill="var(--muted)">Cam · Jacqueline</text><text x="90" y="118" text-anchor="middle" fill="var(--muted)">camera, timing</text>
+            <rect x="200" y="60" width="150" height="74" rx="5" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/><text x="275" y="84" text-anchor="middle" font-weight="600" fill="currentColor">Perception</text><text x="275" y="102" text-anchor="middle" fill="var(--muted)">Vishwa · Qualcomm eng.</text><text x="275" y="118" text-anchor="middle" fill="var(--muted)">.pte in, keypoints out</text>
+            <rect x="390" y="60" width="150" height="74" rx="5" fill="var(--surface)" stroke="currentColor"/><text x="465" y="84" text-anchor="middle" font-weight="600" fill="currentColor">Analysis</text><text x="465" y="102" text-anchor="middle" fill="var(--muted)">engineers + clinicians</text><text x="465" y="118" text-anchor="middle" fill="var(--muted)">angles, reps, scores</text>
+            <rect x="580" y="60" width="150" height="74" rx="5" fill="var(--surface)" stroke="currentColor"/><text x="655" y="84" text-anchor="middle" font-weight="600" fill="currentColor">Service</text><text x="655" y="102" text-anchor="middle" fill="var(--muted)">Vishwa · David</text><text x="655" y="118" text-anchor="middle" fill="var(--muted)">sessions, WebSocket, SQLite</text>
+            <rect x="770" y="60" width="150" height="74" rx="5" fill="var(--surface)" stroke="currentColor"/><text x="845" y="84" text-anchor="middle" font-weight="600" fill="currentColor">Frontend</text><text x="845" y="102" text-anchor="middle" fill="var(--muted)">David</text><text x="845" y="118" text-anchor="middle" fill="var(--muted)">screens, overlay, charts</text>
+            <line x1="160" y1="97" x2="198" y2="97" stroke="currentColor" stroke-width="1.5" marker-end="url(#a)"/><text x="179" y="88" text-anchor="middle" font-size="9.5" fill="var(--muted)">RGB frames</text>
+            <line x1="350" y1="97" x2="388" y2="97" stroke="var(--accent)" stroke-width="2" marker-end="url(#a)"/><text x="369" y="88" text-anchor="middle" font-size="9.5" fill="var(--muted)">keypoints</text>
+            <line x1="540" y1="97" x2="578" y2="97" stroke="currentColor" stroke-width="1.5" marker-end="url(#a)"/><text x="559" y="88" text-anchor="middle" font-size="9.5" fill="var(--muted)">rep_event</text>
+            <line x1="730" y1="90" x2="768" y2="90" stroke="currentColor" stroke-width="1.5" marker-end="url(#a)"/><text x="749" y="81" text-anchor="middle" font-size="9.5" fill="var(--muted)">messages</text>
+            <line x1="768" y1="110" x2="730" y2="110" stroke="currentColor" stroke-width="1.5" marker-end="url(#a)"/><text x="749" y="126" text-anchor="middle" font-size="9.5" fill="var(--muted)">control</text>
+            <rect x="390" y="170" width="150" height="56" rx="5" fill="var(--warn-soft)" stroke="var(--warn)"/><text x="465" y="192" text-anchor="middle" font-weight="600" fill="currentColor">Protocols (JSON)</text><text x="465" y="210" text-anchor="middle" fill="var(--muted)">clinicians</text>
+            <line x1="465" y1="170" x2="465" y2="136" stroke="var(--warn)" stroke-width="1.5" marker-end="url(#a)"/>
+            <text x="20" y="30" font-size="11" fill="var(--muted)">Rule: a layer talks to its neighbours only through the data shown on the arrows. Fields may be added, never renamed.</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>Swap the perception backend (CPU YOLO today, NPU RTMPose later) and nothing to its right changes.</figcaption>
+    </figure>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Layer</th><th>Must not</th><th>Hands over</th></tr></thead>
+        <tbody>
+          <tr><td>Capture</td><td>run a model or know about protocols</td><td>timestamped RGB frames</td></tr>
+          <tr><td>Perception</td><td>smooth, count, or score</td><td>17 keypoints with confidence, inference time, runtime and model names</td></tr>
+          <tr><td>Analysis</td><td>touch the camera or the UI</td><td><code>rep_event</code>, test events, <code>session_summary</code></td></tr>
+          <tr><td>Protocols</td><td>contain code</td><td>JSON: instructions, phases, metrics, thresholds, report fields</td></tr>
+          <tr><td>Service</td><td>compute scores inline</td><td>the WebSocket stream and <code>GET /api/sessions</code></td></tr>
+          <tr><td>Frontend</td><td>recompute reps or scores from keypoints</td><td>control messages: select protocol, start, stop, baseline</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">3 · Git</div>
+    <h2>Collaboration rules</h2>
+    <ol>
+      <li>Branch per person and topic: <code>dm/session-screen</code>, <code>vp/qnn-backend</code>. Small and short-lived.</li>
+      <li>Before a pull request: the matching <code>just test-*</code> recipe, <code>ruff check src</code>, and for the UI <code>bun run --cwd ui test</code> and <code>build</code>.</li>
+      <li>Pull request against <code>main</code>, link the plan task, one reviewer, merge early and often.</li>
+      <li>Knowledge changes update the owning Wiki page plus a dated log entry in the same pull request. One task list: <code>Wiki/plan.md</code>.</li>
+      <li>Never commit <code>artifacts/</code>, <code>data/</code>, weights, recordings, calibration files, personal names, or Windows account names.</li>
+      <li>Check the next free <code>SH-T-</code> number before adding one; two parallel pull requests already collided once today.</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="eyebrow">4 · The shared laptop</div>
+    <h2>One Snapdragon laptop, six people, no collisions</h2>
+    <p>The laptop is a deployment and measurement target. Develop on your own machine; the laptop runs <code>main</code> plus the one branch under test. Reach it over Tailscale at <code>qcworkshop27.tail2122cc.ts.net</code> through Windows OpenSSH; the account name lives in the team chat, not in Git.</p>
+    <figure class="wide">
+      <div class="frame">
+        <svg viewBox="0 0 940 300" role="img" aria-label="Several teammate computers connect over Tailscale and SSH to one laptop. Inside the laptop: a shared checkout, an x64 Python environment and a native ARM64 environment, a shared models folder, a QNN folder, and per-person runs folders. The camera is a single resource with one owner at a time. Ports 8765 and 5173 serve the API and UI, 8770 the depth bridge, 8780 the QNN runner." style="color: var(--fg)">
+          <defs><marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+          <g font-size="11">
+            <g fill="var(--surface)" stroke="currentColor">
+              <rect x="20" y="40" width="120" height="36" rx="5"/><rect x="20" y="92" width="120" height="36" rx="5"/><rect x="20" y="144" width="120" height="36" rx="5"/><rect x="20" y="196" width="120" height="36" rx="5"/>
+            </g>
+            <g fill="currentColor" text-anchor="middle"><text x="80" y="63">Vishwa's Mac</text><text x="80" y="115">David's Mac</text><text x="80" y="167">Cam / Jacqueline</text><text x="80" y="219">Qualcomm engineer</text></g>
+            <g stroke="currentColor" stroke-width="1.5" marker-end="url(#b)"><line x1="140" y1="58" x2="218" y2="120"/><line x1="140" y1="110" x2="218" y2="126"/><line x1="140" y1="162" x2="218" y2="134"/><line x1="140" y1="214" x2="218" y2="140"/></g>
+            <text x="180" y="100" text-anchor="middle" font-size="9.5" fill="var(--muted)">Tailscale + SSH</text>
+            <rect x="220" y="20" width="700" height="260" rx="8" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>
+            <text x="236" y="42" font-weight="600" fill="currentColor">Dell Snapdragon X Elite · qcworkshop27 · steward: Vishwa</text>
+            <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">
+              <rect x="236" y="56" width="210" height="150" rx="5" fill="var(--bg)" stroke="var(--line)"/>
+              <text x="246" y="74" font-weight="600">C:\sh\</text>
+              <text x="246" y="92">SecondHands\   shared checkout</text>
+              <text x="246" y="108">envs\x64\      Tier 0 env</text>
+              <text x="246" y="124">envs\arm64\    native env</text>
+              <text x="246" y="140">models\        weights, .pte</text>
+              <text x="246" y="156">qnn\           QAIRT, runner</text>
+              <text x="246" y="172">runs\&lt;initials&gt;\  your results</text>
+              <text x="246" y="196" fill="var(--muted)">proposed layout</text>
+            </g>
+            <rect x="466" y="56" width="200" height="70" rx="5" fill="var(--warn-soft)" stroke="var(--warn)"/>
+            <text x="566" y="78" text-anchor="middle" font-weight="600" fill="currentColor">Camera · one owner at a time</text>
+            <text x="566" y="96" text-anchor="middle" fill="var(--muted)">post "camera: who, what, until"</text>
+            <text x="566" y="112" text-anchor="middle" fill="var(--muted)">exports and tests run alongside</text>
+            <rect x="686" y="56" width="220" height="150" rx="5" fill="var(--bg)" stroke="var(--line)"/>
+            <text x="696" y="76" font-weight="600" fill="currentColor">Ports</text>
+            <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">
+              <text x="696" y="96">8765  SecondHands API</text>
+              <text x="696" y="112">5173  Vite UI → proxies 8765</text>
+              <text x="696" y="128">8770  depth bridge (move)</text>
+              <text x="696" y="144">8780  QNN runner socket</text>
+            </g>
+            <text x="696" y="168" fill="var(--warn)" font-size="10">today 8765 is also the depth bridge viewer:</text>
+            <text x="696" y="182" fill="var(--warn)" font-size="10">do not run both until SH-T-059 lands</text>
+            <rect x="466" y="140" width="200" height="66" rx="5" fill="var(--bg)" stroke="var(--line)"/>
+            <text x="476" y="160" font-weight="600" fill="currentColor">Environments</text>
+            <text x="476" y="178" fill="var(--muted)">built from the lockfiles only;</text>
+            <text x="476" y="194" fill="var(--muted)">no hand pip installs</text>
+            <text x="236" y="236" fill="var(--muted)">Your dashboard: ssh -L 5173:127.0.0.1:5173 -L 8765:127.0.0.1:8765 … then open localhost:5173. One pipeline, so one live dashboard at a time.</text>
+            <text x="236" y="256" fill="var(--muted)">Measurements go to runs\&lt;initials&gt;\ and then to the Wiki experiments page with command, versions, numbers.</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>The steward is the only person who changes environments, installs software, or switches the shared checkout's branch.</figcaption>
+    </figure>
+    <div class="cols">
+      <div><h3>Morning, ten minutes</h3><p>Who runs what on the laptop today and when the camera is needed. Write the camera schedule in the chat.</p></div>
+      <div><h3>During the day</h3><p>Branches and pull requests. The steward merges <code>main</code> onto the laptop at agreed times, not continuously, so no measurement is taken on a moving target.</p></div>
+      <div><h3>Before the rehearsal</h3><p>Freeze <code>main</code>, record the commit and <code>.pte</code> hashes and versions in the Wiki, stop merging.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">5 · Models</div>
+    <h2>Where each model comes from and what it still needs</h2>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Model</th><th>Get it</th><th>ExecuTorch status</th><th>Work needed</th><th>Who</th></tr></thead>
+        <tbody>
+          <tr><td>YOLO11n-pose</td><td><code>just smoke-yolo-pose-executorch</code> downloads the weights and writes the <code>.pte</code></td><td><span class="pill">runs · XNNPACK CPU</span> verified against PyTorch</td><td>None for the demo. Optional 8-bit + QNN export for the NPU</td><td>Vishwa</td></tr>
+          <tr><td>RTMPose</td><td><code>pip install "qai-hub-models[rtmpose-body2d]"</code> or the MMPose RTMPose-t/s checkpoint</td><td><span class="pill warn">needs conversion</span> no published <code>.pte</code></td><td><code>torch.export</code>, 8-bit PT2E with ~100 calibration frames, Qualcomm backend for SC8380XP, ARM64 runner. Recipe: <code>experiments/qnn_export_pose.py</code> (untested)</td><td>Qualcomm engineer + Vishwa</td></tr>
+          <tr><td>Window classifier (ours)</td><td>trained from a short labeled recording</td><td><span class="pill warn">needs training, then export</span></td><td>Record, label with the rule counter, train in minutes, XNNPACK then QNN</td><td>engineers + Qualcomm engineer</td></tr>
+          <tr><td>MediaPipe Pose Landmarker</td><td>add to <code>recognition/assets.py</code>, then <code>just download-mediapipe-models</code></td><td><span class="pill plain">not ExecuTorch</span> MediaPipe runtime</td><td>None; fallback and validation reference. Native ARM64 Python needs <code>--no-deps</code></td><td>Vishwa</td></tr>
+          <tr><td>MediaPipe Face + Gesture</td><td><code>just download-mediapipe-models</code></td><td><span class="pill plain">not ExecuTorch</span></td><td>None; assistive control, retained</td><td>existing</td></tr>
+          <tr><td>AI Hub MediaPipe-Pose, HRNet, LiteHRNet, Posenet</td><td>pre-exported QNN/ONNX from the model pages</td><td><span class="pill plain">not .pte</span> runs through <code>onnxruntime-qnn</code></td><td>Only as an NPU fallback outside ExecuTorch</td><td>Vishwa</td></tr>
+          <tr><td>DeepLabV3 <code>dlv3_qnn.pte</code></td><td>supplied by the hackathon on the laptop</td><td><span class="pill">Qualcomm backend</span></td><td>None; reference for runner, libraries, profiling</td><td>Vishwa</td></tr>
+          <tr><td>Laya, Mapika, SmolVLM</td><td><code>just download-laya</code> etc. (gigabytes)</td><td><span class="pill plain">not ExecuTorch</span></td><td>Deferred; not part of the tracker demo</td><td>nobody this weekend</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Licences: Ultralytics is AGPL-3.0; RTMPose, MMPose, and MediaPipe are Apache-2.0; AI Hub deployable models carry the AI Hub Models licence. Fine for the public repository; a closed product later would need a commercial Ultralytics licence or a different fallback.</p>
+  </section>
+
+  <footer>Source of truth: <code>Wiki/runbooks/team-workflow.md</code>. Companion pages: the architecture walkthrough, the project brief, and the interactive console prototype. Laptop paths and the port moves are proposals until the steward confirms them.</footer>
+</main>
+
+</body>
+</html>

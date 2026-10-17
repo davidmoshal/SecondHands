@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Movement Tracker Architecture</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one reading column, two wide diagrams that may scroll sideways, tables below. */
+  :root {
+    --bg: #f6f7f4;
+    --surface: #ffffff;
+    --fg: #1b2420;
+    --muted: #5c6a63;
+    --line: #d5dcd6;
+    --accent: #0f6e63;        /* teal: the ExecuTorch path */
+    --accent-soft: #d9ece8;
+    --warn: #a35a00;          /* amber: untested / fallback */
+    --warn-soft: #f6e8d2;
+    --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141917; --surface: #1c2320; --fg: #e6ebe7; --muted: #9fb0a7; --line: #2f3a35;
+      --accent: #5fc4b4; --accent-soft: #1b3b36; --warn: #e3a44a; --warn-soft: #3a2c15; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141917; --surface: #1c2320; --fg: #e6ebe7; --muted: #9fb0a7; --line: #2f3a35;
+    --accent: #5fc4b4; --accent-soft: #1b3b36; --warn: #e3a44a; --warn-soft: #3a2c15; color-scheme: dark;
+  }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+         padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; }
+  main { max-width: 960px; margin: 0 auto; display: grid; gap: 40px; }
+  h1, h2, h3 { text-wrap: balance; line-height: 1.2; margin: 0; }
+  h1 { font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 600; }
+  h2 { font-size: 1.3rem; font-weight: 600; }
+  h3 { font-size: 1.05rem; font-weight: 600; }
+  p { margin: 0; max-width: 68ch; }
+  .lede { color: var(--muted); max-width: 70ch; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  header { display: grid; gap: 10px; }
+  section { display: grid; gap: 16px; }
+  figure { margin: 0; display: grid; gap: 10px; }
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); padding: 12px; }
+  svg { display: block; max-width: 100%; height: auto; min-width: 640px; font-family: var(--font-body); }
+  figcaption { color: var(--muted); font-size: 0.92rem; max-width: 70ch; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.85rem; color: var(--muted); }
+  .legend span::before { content: ""; display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--accent); margin-right: 6px; vertical-align: middle; }
+  .legend span.dashed::before { border-top-style: dashed; border-color: var(--warn); }
+  .legend span.plain::before { border-color: currentColor; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { font-weight: 600; color: var(--muted); font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; }
+  td:first-child { font-weight: 500; white-space: nowrap; }
+  .pill { display: inline-block; font-family: var(--font-mono); font-size: 0.72rem; padding: 1px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+  pre { font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.5; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; overflow-x: auto; margin: 0; }
+  ol, ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; max-width: 70ch; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+  .cols > div { min-width: 0; display: grid; gap: 8px; align-content: start; }
+  footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 16px; }
+  a { color: var(--accent); }
+  @media (max-width: 480px) { body { font-size: 15px; } td:first-child { white-space: normal; } }
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+
+<main>
+  <header>
+    <div class="eyebrow">SecondHands · ExecuTorch hackathon · Compute track · 17–18 Oct 2026</div>
+    <h1>Movement Tracker Architecture</h1>
+    <p class="lede">A camera-based fitness tracker on the Snapdragon X Elite laptop. Pose estimation runs through ExecuTorch, rep counting is deterministic, and a small trained classifier is the NPU showcase. The Wiki page <code>Wiki/design/tech-stack.md</code> is the source of truth; this page is the walkthrough.</p>
+  </header>
+
+  <section>
+    <div class="eyebrow">1 · Data flow</div>
+    <h2>From camera frame to rep count</h2>
+    <p>Every layer talks to the next through one kind of data. Keypoints are the hinge: everything above them is model work, everything below them is ordinary application code.</p>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 920 330" role="img" aria-label="Pipeline: camera frames go to capture, then to pose estimation through ExecuTorch, producing keypoints; the analysis layer turns keypoints into rep events and form cues through angle rules and a window classifier; the FastAPI WebSocket service sends pose, rep_event and session_summary messages to the React UI and stores summaries in SQLite." style="color: var(--fg)">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+            <marker id="ah-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker>
+          </defs>
+          <!-- row 1: sensing and perception -->
+          <rect x="20" y="40" width="150" height="64" rx="4" fill="var(--surface)" stroke="currentColor"/>
+          <text x="95" y="66" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Camera</text>
+          <text x="95" y="86" text-anchor="middle" font-size="11" fill="var(--muted)">webcam · RealSense RGB</text>
+
+          <rect x="230" y="40" width="150" height="64" rx="4" fill="var(--surface)" stroke="currentColor"/>
+          <text x="305" y="66" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Capture</text>
+          <text x="305" y="86" text-anchor="middle" font-size="11" fill="var(--muted)">OpenCV · letterbox</text>
+
+          <rect x="440" y="30" width="200" height="84" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="540" y="56" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Pose estimation</text>
+          <text x="540" y="76" text-anchor="middle" font-size="11" fill="var(--muted)">ExecuTorch .pte</text>
+          <text x="540" y="94" text-anchor="middle" font-size="11" fill="var(--muted)">YOLO-pose (CPU) · RTMPose (NPU)</text>
+
+          <rect x="700" y="40" width="200" height="64" rx="4" fill="var(--surface)" stroke="currentColor"/>
+          <text x="800" y="66" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Keypoints</text>
+          <text x="800" y="86" text-anchor="middle" font-size="11" fill="var(--muted)">17 joints · x, y, confidence</text>
+
+          <line x1="170" y1="72" x2="228" y2="72" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
+          <text x="199" y="62" text-anchor="middle" font-size="10" fill="var(--muted)">RGB frames</text>
+          <line x1="380" y1="72" x2="438" y2="72" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
+          <text x="409" y="62" text-anchor="middle" font-size="10" fill="var(--muted)">tensor</text>
+          <line x1="640" y1="72" x2="698" y2="72" stroke="var(--accent)" stroke-width="2" marker-end="url(#ah-acc)"/>
+          <text x="669" y="62" text-anchor="middle" font-size="10" fill="var(--muted)">~34 ms CPU</text>
+
+          <!-- down from keypoints to analysis -->
+          <line x1="800" y1="104" x2="800" y2="140" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
+
+          <!-- row 2: analysis -->
+          <rect x="440" y="142" width="460" height="88" rx="4" fill="var(--surface)" stroke="currentColor"/>
+          <text x="456" y="166" font-size="13" font-weight="600" fill="currentColor">Movement analysis</text>
+          <rect x="456" y="178" width="200" height="40" rx="3" fill="var(--bg)" stroke="currentColor" stroke-dasharray="0"/>
+          <text x="556" y="195" text-anchor="middle" font-size="11" fill="currentColor">Angle rules + rep state machine</text>
+          <text x="556" y="210" text-anchor="middle" font-size="10" fill="var(--muted)">no training · the demo path</text>
+          <rect x="676" y="178" width="208" height="40" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/>
+          <text x="780" y="195" text-anchor="middle" font-size="11" fill="currentColor">Window classifier (ExecuTorch)</text>
+          <text x="780" y="210" text-anchor="middle" font-size="10" fill="var(--muted)">1–2 s of keypoints · NPU candidate</text>
+
+          <!-- left from analysis to service -->
+          <line x1="438" y1="186" x2="380" y2="186" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
+          <text x="409" y="176" text-anchor="middle" font-size="10" fill="var(--muted)">rep_event</text>
+          <text x="409" y="202" text-anchor="middle" font-size="10" fill="var(--muted)">cues, scores</text>
+
+          <!-- row 2 left: service -->
+          <rect x="180" y="142" width="200" height="88" rx="4" fill="var(--surface)" stroke="currentColor"/>
+          <text x="280" y="166" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">FastAPI service</text>
+          <text x="280" y="186" text-anchor="middle" font-size="11" fill="var(--muted)">WebSocket /api/session</text>
+          <text x="280" y="204" text-anchor="middle" font-size="11" fill="var(--muted)">loopback 127.0.0.1:8765</text>
+
+          <!-- storage -->
+          <rect x="20" y="154" width="120" height="64" rx="4" fill="var(--surface)" stroke="currentColor"/>
+          <text x="80" y="180" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">SQLite</text>
+          <text x="80" y="198" text-anchor="middle" font-size="11" fill="var(--muted)">sessions, baselines</text>
+          <line x1="178" y1="186" x2="142" y2="186" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
+          <text x="160" y="176" text-anchor="middle" font-size="10" fill="var(--muted)">summary</text>
+
+          <!-- down from service to UI -->
+          <line x1="280" y1="230" x2="280" y2="268" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
+          <text x="360" y="252" text-anchor="middle" font-size="10" fill="var(--muted)">pose · rep_event · session_summary</text>
+
+          <!-- row 3: UI -->
+          <rect x="180" y="270" width="200" height="50" rx="4" fill="var(--surface)" stroke="currentColor"/>
+          <text x="280" y="291" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">React UI (Vite, Bun)</text>
+          <text x="280" y="308" text-anchor="middle" font-size="11" fill="var(--muted)">skeleton overlay · rep counter · progress</text>
+          <text x="470" y="300" font-size="10" fill="var(--muted)">control: select exercise, start, stop, mark baseline ⟶ service</text>
+        </svg>
+      </div>
+      <figcaption>Teal marks the ExecuTorch path. Frames never leave the laptop; only derived measurements are stored.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="eyebrow">2 · Processes on the laptop</div>
+    <h2>Why the NPU needs a second process</h2>
+    <p>Windows 11 ARM64 has native wheels for PyTorch, MediaPipe and ONNX Runtime, but not for ExecuTorch or OpenCV. So the day-one service runs as x64 Python under emulation, where every package exists. The Qualcomm NPU is reachable only from a native ARM64 process with the QNN libraries, so that part is a separate runner the service talks to over a local socket.</p>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 920 300" role="img" aria-label="Two process layouts side by side. Tier 0: one x64 Python process under emulation runs capture, the ExecuTorch XNNPACK pose model, analysis and the service, on the Oryon CPU. Tier 2 adds a native ARM64 runner process that loads a QNN-delegated .pte and executes on the Hexagon NPU; the Python service sends tensors over a local socket and receives keypoints." style="color: var(--fg)">
+          <defs>
+            <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+          </defs>
+          <!-- Tier 0 -->
+          <text x="20" y="24" font-size="12" font-weight="600" fill="currentColor">Tier 0 · day one · works today</text>
+          <rect x="20" y="36" width="400" height="200" rx="6" fill="var(--surface)" stroke="currentColor" stroke-dasharray="5 4"/>
+          <text x="32" y="56" font-size="11" fill="var(--muted)">x64 Python 3.12 process · Windows x64 emulation</text>
+          <rect x="36" y="70" width="110" height="44" rx="4" fill="var(--bg)" stroke="currentColor"/>
+          <text x="91" y="96" text-anchor="middle" font-size="11" fill="currentColor">Capture (OpenCV)</text>
+          <rect x="164" y="70" width="110" height="44" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="219" y="90" text-anchor="middle" font-size="11" fill="currentColor">ExecuTorch 1.5.1</text>
+          <text x="219" y="104" text-anchor="middle" font-size="10" fill="var(--muted)">XNNPACK .pte</text>
+          <rect x="292" y="70" width="110" height="44" rx="4" fill="var(--bg)" stroke="currentColor"/>
+          <text x="347" y="90" text-anchor="middle" font-size="11" fill="currentColor">Analysis + API</text>
+          <text x="347" y="104" text-anchor="middle" font-size="10" fill="var(--muted)">FastAPI, SQLite</text>
+          <line x1="146" y1="92" x2="162" y2="92" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah2)"/>
+          <line x1="274" y1="92" x2="290" y2="92" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah2)"/>
+          <rect x="36" y="150" width="366" height="60" rx="4" fill="var(--bg)" stroke="currentColor"/>
+          <text x="219" y="174" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Oryon CPU (12 cores)</text>
+          <text x="219" y="194" text-anchor="middle" font-size="10" fill="var(--muted)">emulated x64 kernels · measure fps; drop to 416 px if slow</text>
+          <line x1="219" y1="114" x2="219" y2="148" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah2)"/>
+          <text x="20" y="262" font-size="11" fill="var(--muted)">Satisfies "ExecuTorch runs the model on device" with CPU evidence.</text>
+
+          <!-- Tier 2 -->
+          <text x="480" y="24" font-size="12" font-weight="600" fill="currentColor">Tier 2 · NPU · with the Qualcomm engineer</text>
+          <rect x="480" y="36" width="190" height="200" rx="6" fill="var(--surface)" stroke="currentColor" stroke-dasharray="5 4"/>
+          <text x="492" y="56" font-size="11" fill="var(--muted)">x64 Python (same as Tier 0)</text>
+          <rect x="496" y="70" width="158" height="44" rx="4" fill="var(--bg)" stroke="currentColor"/>
+          <text x="575" y="90" text-anchor="middle" font-size="11" fill="currentColor">Capture · Analysis · API</text>
+          <text x="575" y="104" text-anchor="middle" font-size="10" fill="var(--muted)">pose backend = socket client</text>
+
+          <rect x="710" y="36" width="190" height="200" rx="6" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="722" y="56" font-size="11" fill="var(--muted)">native ARM64 process</text>
+          <rect x="726" y="70" width="158" height="44" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="805" y="90" text-anchor="middle" font-size="11" fill="currentColor">qnn_executor_runner</text>
+          <text x="805" y="104" text-anchor="middle" font-size="10" fill="var(--muted)">QNN-delegated .pte · QAIRT 2.37</text>
+          <rect x="726" y="150" width="158" height="60" rx="4" fill="var(--bg)" stroke="currentColor"/>
+          <text x="805" y="174" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Hexagon NPU (HTP v73)</text>
+          <text x="805" y="194" text-anchor="middle" font-size="10" fill="var(--muted)">8-bit RTMPose · window classifier</text>
+          <line x1="805" y1="114" x2="805" y2="148" stroke="var(--accent)" stroke-width="2" marker-end="url(#ah2)"/>
+
+          <line x1="654" y1="86" x2="724" y2="86" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah2)"/>
+          <text x="689" y="78" text-anchor="middle" font-size="10" fill="var(--muted)">input tensor</text>
+          <line x1="724" y1="100" x2="654" y2="100" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah2)"/>
+          <text x="689" y="124" text-anchor="middle" font-size="10" fill="var(--muted)">keypoints (local socket)</text>
+          <text x="480" y="262" font-size="11" fill="var(--muted)">Export on x64 Python; profiler trace proves HTP delegation.</text>
+        </svg>
+      </div>
+      <figcaption>The pose backend is swappable behind the same <code>pose</code> message, so the UI and the rep logic do not change between tiers.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="eyebrow">3 · Models</div>
+    <h2>Which pose model, and what needs training</h2>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Model</th><th>Status</th><th>Route to ExecuTorch</th><th>Training</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>RTMPose</td><td><span class="pill warn">to convert</span></td><td>PyTorch module from MMPose or <code>qai_hub_models</code> → Qualcomm backend, 8-bit. AI Hub: ~1.8 ms on the X Elite NPU</td><td>None (COCO pretrained)</td><td>Primary NPU model, with the Qualcomm engineer</td></tr>
+          <tr><td>YOLO11n-pose</td><td><span class="pill">verified CPU</span></td><td><code>yolo export format=executorch</code>, XNNPACK. 11.7 MB, matches PyTorch within 3.3e-3</td><td>None</td><td>Demo fallback that works today</td></tr>
+          <tr><td>Window classifier</td><td><span class="pill warn">to train</span></td><td>Team's own small 1-D conv or GRU → XNNPACK, then Qualcomm backend</td><td>Minutes, on self-recorded clips labeled by the rule counter</td><td>The on-device AI story; simplest model to delegate</td></tr>
+          <tr><td>MediaPipe Pose</td><td><span class="pill">available</span></td><td>Not ExecuTorch (TFLite / MediaPipe runtime)</td><td>None</td><td>Robustness fallback and validation reference</td></tr>
+          <tr><td>RTMO, HRNet, LiteHRNet, Posenet</td><td><span class="pill warn">optional</span></td><td>Same Qualcomm path; more export risk or lower accuracy</td><td>None</td><td>Only if RTMPose conversion fails</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Rep counting and form cues need no training at all. Quantization needs about 100 calibration frames of people exercising at the demo distance; record them on day one.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">4 · Conversion handoff</div>
+    <h2>What to give the Qualcomm engineer, and what to ask back</h2>
+    <div class="cols">
+      <div>
+        <h3>Give</h3>
+        <ol>
+          <li>PyTorch <code>nn.Module</code> plus weights that load without MMPose training code (for RTMPose, the <code>qai_hub_models</code> wrapper).</li>
+          <li>Input contract: shape, float32 RGB, normalization, how the person crop is made.</li>
+          <li>Target: <code>QcomChipset.SC8380XP</code>, ExecuTorch 1.5.1, QAIRT 2.37.0, Windows 11 ARM64, export under x64 Python.</li>
+          <li>About 100 calibration frames and 10 saved PyTorch reference outputs (<code>.npy</code>).</li>
+          <li>Precision preference: <code>8a8w</code> first, <code>16a8w</code> if keypoint error grows.</li>
+          <li>The starting recipe <code>experiments/qnn_export_pose.py</code> (untested, written from the backend docs).</li>
+        </ol>
+      </div>
+      <div>
+        <h3>Ask back</h3>
+        <ol>
+          <li>The <code>.pte</code> with the exact export command and tool versions.</li>
+          <li>The native ARM64 runner or backend DLL build, or confirmation the hackathon bundle runs it.</li>
+          <li>A profiler or ETDump trace showing operators on the HTP, plus warmed latency.</li>
+          <li>The list of operators that fell back to CPU.</li>
+          <li>Measured keypoint error against the reference outputs per precision.</li>
+        </ol>
+        <h3>Core of the recipe</h3>
+<pre>quantizer = QnnQuantizer()                      # 8a8w default
+m = torch.export.export(model, (x,), strict=True).module()
+m = prepare_pt2e(m, quantizer); [m(c) for c in calib]
+q = convert_pt2e(m)
+spec = generate_qnn_executorch_compiler_spec(
+    soc_model=QcomChipset.SC8380XP,
+    backend_options=generate_htp_compiler_spec(use_fp16=False))
+pte = to_edge_transform_and_lower_to_qnn(q, (x,), spec).to_executorch()</pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">5 · Interface contract</div>
+    <h2>Three messages the frontend builds against</h2>
+    <div class="cols">
+      <div>
+        <h3><code>pose</code> · every frame</h3>
+<pre>{"type":"pose","frame_id":812,
+ "inference_ms":38.2,
+ "runtime":"executorch-xnnpack",
+ "model":"yolo11n-pose",
+ "keypoints":[[0.51,0.22,0.98], …17],
+ "angles":{"left_knee":92.5,
+           "trunk_lean":12.0}}</pre>
+      </div>
+      <div>
+        <h3><code>rep_event</code> · per repetition</h3>
+<pre>{"type":"rep_event",
+ "session_id":"s-20261017-01",
+ "exercise":"squat","rep":7,
+ "phase":"up","duration_ms":2150,
+ "depth_score":0.82,
+ "cues":["Go a little deeper"],
+ "source":"rules"}</pre>
+      </div>
+      <div>
+        <h3><code>session_summary</code> · at stop</h3>
+<pre>{"type":"session_summary",
+ "session_id":"s-20261017-01",
+ "exercise":"squat","reps":12,
+ "median_rep_ms":2200,
+ "form_score":0.78,
+ "baseline":{"reps":8,
+   "form_score":0.70}}</pre>
+      </div>
+    </div>
+    <p>Keypoints are normalized to the image with a confidence per point. <code>source</code> says whether the rule counter or the classifier produced the event, so both can be shown during evaluation.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">6 · Order of work</div>
+    <h2>Two days, one rule: the demo never waits on a conversion</h2>
+    <div class="cols">
+      <div>
+        <h3>Day 1</h3>
+        <ul>
+          <li>Pick the camera with one capture test each on the Dell.</li>
+          <li>Install x64 Python 3.12 and run <code>just smoke-yolo-pose-executorch</code> on the laptop; measure fps.</li>
+          <li>Angles, squat and push-up state machines, the three messages, SQLite.</li>
+          <li>Record calibration frames and a small labeled clip set; hand RTMPose to the Qualcomm engineer.</li>
+          <li>Session screen with skeleton overlay and rep counter against real messages.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Day 2</h3>
+        <ul>
+          <li>Train and export the window classifier; compare with the rule counter on held-out clips.</li>
+          <li>If the QNN <code>.pte</code> loads, swap the pose backend and capture the profiler trace; otherwise keep CPU and say so.</li>
+          <li>Progress screen, baseline comparison, stop and restart checks.</li>
+          <li>Freeze artifacts; measure warmed latency, memory and sustained behavior.</li>
+          <li>Presentation mapped to the judging weights: use case 40, technical 25, on-device efficiency 15, docs 10, demo 10.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>Sources and evidence live in the repository Wiki: <code>design/tech-stack.md</code>, <code>references/models/pose-candidates.md</code>, <code>experiments-before-saturday.md</code>. AI Hub latency figures are Qualcomm's published numbers; only the YOLO CPU export has been run by the team.</footer>
+</main>
+
+</body>
+</html>
