@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Movement tracker tech stack proposed
+
+Added [the movement tracker tech stack](design/tech-stack.md) for the user's camera-based fitness tracker request: article-to-feature mapping, sensing options for the available cameras, YOLO-pose through ExecuTorch with MediaPipe and Qualcomm AI Hub fallbacks, deterministic rep counting plus a small trained ExecuTorch classifier, three runtime tiers on Windows ARM64 with a checked package-availability table, the WebSocket interface contract, a document map for the requirements, design, and frontend teammates, a two-day plan, and risks. Opened SH-Q-005 (relation to SecondHands) and SH-Q-006 (demonstration camera). Added Phase 9 tasks SH-T-047 to SH-T-054 to [the plan](plan.md#movement-tracker), a direction entry in [Project direction](project.md#established-user-direction), pointers from [the design index](design/index.md), [the laptop page](hardware/snapdragon-x-elite.md#deployment-checks), and [the runbook](runbooks/mac-and-snapdragon-development.md#windows-arm64-compatibility-limit), and source record SH-S-017. Nothing ran on the laptop; the Mayo article page could not be fetched.
+
 ## 2026-10-17 — Event backers recorded
 
 Added GitHub, Meta, and Qualcomm to [the judging page](hackathon/judging-criteria.md#event-backers), following the user's identification and the logos visible in the supplied photograph. No specific sponsorship roles or commitments are inferred.

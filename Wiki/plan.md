@@ -105,6 +105,19 @@ The user requested these GitHub work items on 2026-10-17. Use the issues for nam
 - [ ] **SH-T-014 — Rehearse the two-participant demonstration.** Verify personalized mappings, physical response, target-PC operation, and local processing.
 - [ ] **SH-T-015 — Prepare presentation and evidence.** Address the [five judging criteria](hackathon/judging-criteria.md#scoring). Separate demonstrated behavior, measured results, the actual ExecuTorch contribution, and future proposals.
 
+## Movement tracker
+
+**Phase 9: camera-based fitness tracker on the Snapdragon laptop.** Requested on 2026-10-17; [the tech stack page](design/tech-stack.md) owns the proposed stack, tiers, and interface contract. Its relation to the assistive scope is undecided, so these tasks establish feasibility and the shared contract without changing the current proposal.
+
+- [ ] **SH-T-047 — Decide the tracker's relation to SecondHands.** Resolve [SH-Q-005](design/tech-stack.md#sh-q-005--how-does-the-movement-tracker-relate-to-secondhands) with the team, then align the requirements document, proposal, and demo script.
+- [ ] **SH-T-048 — Select and test the demonstration camera.** Resolve [SH-Q-006](design/tech-stack.md#sh-q-006--which-camera-serves-the-demonstration) with one capture test per available camera on the Dell; record frame rate and the x64-versus-ARM64 process used.
+- [ ] **SH-T-049 — Export a pose model to ExecuTorch and validate it.** Export YOLO-pose to an XNNPACK `.pte` on a development machine, compare keypoints with the PyTorch model on sample images, and record size, latency, and the export tool versions. No export has been run yet.
+- [ ] **SH-T-050 — Stand up Tier 0 on the laptop.** Install x64 Python 3.12 under emulation with the [checked package set](design/tech-stack.md#runtime-on-the-snapdragon-laptop), run the `.pte` on live frames, and record frames per second, latency, and memory.
+- [ ] **SH-T-051 — Implement angle-based rep counting and the session service.** Joint angles, squat and push-up state machines, `pose`, `rep_event`, and `session_summary` messages per [the interface contract](design/tech-stack.md#service-and-interface-contract), and SQLite session storage. Test with recorded clips kept outside Git.
+- [ ] **SH-T-052 — Train and export the window classifier.** Record a small labeled set, train the keypoint-window classifier, export it with XNNPACK, then attempt the Qualcomm backend export with 8-bit quantization and record delegation evidence. The deterministic counter remains the demo path if this is incomplete.
+- [ ] **SH-T-053 — Build the session and progress screens.** Skeleton overlay, rep counter, form cues, and baseline comparison from the contract messages; coordinate with the frontend teammates' chosen framework.
+- [ ] **SH-T-054 — Link the teammates' documents.** When the requirements, design, and frontend documents exist, link them from [the document map](design/tech-stack.md#document-map-for-the-team) and [the index](index.md).
+
 ## Optional experiments
 
 These remain outside the initial completion requirement; record results in [experiments](experiments-before-saturday.md).

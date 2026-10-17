@@ -29,6 +29,8 @@ These are remaining checks under [SH-T-001 in the plan](../plan.md#snapdragon-de
 
 ## Deployment checks
 
+The [movement tracker tech stack](../design/tech-stack.md#runtime-on-the-snapdragon-laptop) records which Python packages publish native Windows ARM64 wheels and which exist only for x64 emulation, checked against package indexes on 2026-10-17. That table explains why the first laptop setup uses x64 Python under emulation and why the ExecuTorch Python package and OpenCV are not installable in a native ARM64 Python today.
+
 Use the [Compute deployment procedure](../hackathon-compute.md#compute-deployment-and-verification) for the supplied ExecuTorch baseline. The event guide describes the expected stack; only tests on this laptop can establish what is installed and working.
 
 Use the [Mac and Snapdragon development runbook](../runbooks/mac-and-snapdragon-development.md) for separate environments, Git synchronization, and remote execution. Successful Mac model runs do not establish Windows compatibility or NPU execution.
