@@ -113,7 +113,8 @@
           <div class="phase" id="c-phase"><span data-p="seated">seated</span><span data-p="rising">rising</span><span data-p="standing">standing</span><span data-p="sitting">sitting</span></div></div></div>
       <div class="flag" id="c-flag">Open the camera to begin. Thresholds are drafts for the clinicians to set.</div>
       <div class="kv">
-        <div><div class="label">Knee L / R</div><div class="v" id="c-knee">— <small>°</small></div></div>
+        <div><div class="label">Knee L / R (3D when available)</div><div class="v" id="c-knee">— <small>°</small></div></div>
+        <div><div class="label">Leg drop</div><div class="v" id="c-drop">— <small>torso</small></div></div>
         <div><div class="label">Hip L / R</div><div class="v" id="c-hip">— <small>°</small></div></div>
         <div><div class="label">Trunk lean</div><div class="v" id="c-lean">— <small>°</small></div></div>
         <div><div class="label">Last rise</div><div class="v" id="c-rise">— <small>s</small></div></div>
@@ -123,14 +124,16 @@
       <div class="controls"><button class="btn primary" id="c-start" disabled>Start set</button><button class="btn" id="c-pause" disabled>Pause</button><button class="btn danger" id="c-stop" disabled>Stop</button></div>
       <div>
         <div class="label" style="margin-bottom:4px">Protocol thresholds (live)</div>
-        <div class="field"><label for="t-down">Counts as down / seated when knee angle below (°)</label><input id="t-down" type="number" value="110" min="60" max="150"></div>
-        <div class="field"><label for="t-up">Counts as standing when knee angle above (°)</label><input id="t-up" type="number" value="160" min="140" max="179"></div>
+        <div class="field"><label for="t-seat">Seated when leg drop below (knee-to-hip height ÷ torso length)</label><input id="t-seat" type="number" value="0.55" step="0.05" min="0.1" max="1"></div>
+        <div class="field"><label for="t-stand">Standing when leg drop above</label><input id="t-stand" type="number" value="0.85" step="0.05" min="0.5" max="1.6"></div>
+        <div class="field"><label for="t-down">Squat: down / bottom when 3D knee angle below (°)</label><input id="t-down" type="number" value="110" min="60" max="150"></div>
+        <div class="field"><label for="t-up">Standing when 3D knee angle above (°), squat and sanity check</label><input id="t-up" type="number" value="160" min="140" max="179"></div>
         <div class="field"><label for="t-reps">Reps this set</label><input id="t-reps" type="number" value="5" min="1" max="30"></div>
         <div class="field"><label for="t-slow">Flag a rise slower than (s)</label><input id="t-slow" type="number" value="2.0" step="0.1" min="0.5"></div>
         <div class="field"><label for="t-lean">Flag trunk lean above (°)</label><input id="t-lean" type="number" value="35" min="10" max="80"></div>
       </div>
       <div style="overflow-x:auto"><table><thead><tr><th class="num">#</th><th class="num">Rise s</th><th class="num">Down s</th><th class="num">Min knee</th><th class="num">Lean</th><th>Flag</th></tr></thead><tbody id="c-rows"><tr><td colspan="6" style="color:var(--muted)">No reps yet.</td></tr></tbody></table></div>
-      <div class="sim">Pose: MediaPipe Pose Landmarker (lite) running in this browser through WebAssembly, 33 landmarks mapped to the 17 COCO joints. On the Snapdragon laptop the same stage runs through ExecuTorch; the rules above are identical.</div>
+      <div class="sim">Pose: MediaPipe Pose Landmarker (lite) running in this browser through WebAssembly, 33 landmarks mapped to the 17 COCO joints. Chair stands are counted from the leg drop (knee-to-hip height in torso lengths), which works from the front where 2D knee angles do not; knee angles come from the 3D world landmarks when available. On the Snapdragon laptop the same stage runs through ExecuTorch; the rules above are identical.</div>
     </div>
   </div>
 </div>
@@ -153,9 +156,9 @@ function speak(t) { if (!voice || !('speechSynthesis' in window)) return; try { 
 
 // ---------- protocol ----------
 const C = { on: false, paused: false, state: 'idle', reps: 0, downAt: 0, upAt: 0, minKnee: 180, leanPeak: 0, log: [], smooth: null };
-const P = { downDeg: 110, upDeg: 160, reps: 5, slowS: 2.0, leanDeg: 35 };
+const P = { downDeg: 110, upDeg: 160, reps: 5, slowS: 2.0, leanDeg: 35, seatDrop: 0.55, standDrop: 0.85 };
 const bind = (id, k) => { const el = $(id); const f = () => { P[k] = Number(el.value); if (k === 'reps') { $('c-target').textContent = P.reps; renderDots(); } }; el.oninput = f; f(); };
-bind('t-down', 'downDeg'); bind('t-up', 'upDeg'); bind('t-reps', 'reps'); bind('t-slow', 'slowS'); bind('t-lean', 'leanDeg');
+bind('t-down', 'downDeg'); bind('t-up', 'upDeg'); bind('t-reps', 'reps'); bind('t-slow', 'slowS'); bind('t-lean', 'leanDeg'); bind('t-seat', 'seatDrop'); bind('t-stand', 'standDrop');
 $('exercise').onchange = () => { const sq = $('exercise').value === 'squat'; $('t-down').value = sq ? 100 : 110; P.downDeg = Number($('t-down').value); $('home-title').textContent = sq ? 'Today: 5 squats' : 'Today: stand up and sit down, 5 times'; $('c-title').textContent = sq ? 'SQ-A · adapted squat set' : 'CS-30 · chair stand · adapted set'; const names = sq ? ['standing', 'down', 'bottom', 'up'] : ['seated', 'rising', 'standing', 'sitting']; [...document.querySelectorAll('#c-phase span')].forEach((s, i) => { s.textContent = names[i]; }); };
 
 // ---------- model ----------
@@ -208,40 +211,61 @@ const MP = { nose: 0, leye: 2, reye: 5, lear: 7, rear: 8, lsho: 11, rsho: 12, le
 const BONES = [['lsho', 'rsho'], ['lsho', 'lelb'], ['lelb', 'lwri'], ['rsho', 'relb'], ['relb', 'rwri'], ['lsho', 'lhip'], ['rsho', 'rhip'], ['lhip', 'rhip'], ['lhip', 'lkne'], ['lkne', 'lank'], ['rhip', 'rkne'], ['rkne', 'rank']];
 function angle(a, b, c) { const v1 = [a.x - b.x, a.y - b.y], v2 = [c.x - b.x, c.y - b.y]; const d = v1[0] * v2[0] + v1[1] * v2[1]; const n = Math.hypot(...v1) * Math.hypot(...v2); if (!n) return null; return Math.acos(Math.max(-1, Math.min(1, d / n))) * 180 / Math.PI; }
 function vis(p) { return (p.visibility ?? 1) > 0.5; }
-function measure(lm) {
+// ---- pure begin
+function angle3(a, b, c) { const v1 = [a.x - b.x, a.y - b.y, a.z - b.z], v2 = [c.x - b.x, c.y - b.y, c.z - b.z]; const d = v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]; const n = Math.hypot(...v1) * Math.hypot(...v2); if (!n) return null; return Math.acos(Math.max(-1, Math.min(1, d / n))) * 180 / Math.PI; }
+function measure(lm, wl, aspect) {
+  // lm: 33 normalized image landmarks; wl: 33 world landmarks in metres (may be missing); aspect = width / height.
   const j = {}; for (const k in MP) j[k] = lm[MP[k]];
-  const kneeL = vis(j.lhip) && vis(j.lkne) && vis(j.lank) ? angle(j.lhip, j.lkne, j.lank) : null;
-  const kneeR = vis(j.rhip) && vis(j.rkne) && vis(j.rank) ? angle(j.rhip, j.rkne, j.rank) : null;
-  const hipL = vis(j.lsho) && vis(j.lhip) && vis(j.lkne) ? angle(j.lsho, j.lhip, j.lkne) : null;
-  const hipR = vis(j.rsho) && vis(j.rhip) && vis(j.rkne) ? angle(j.rsho, j.rhip, j.rkne) : null;
-  const sm = { x: (j.lsho.x + j.rsho.x) / 2, y: (j.lsho.y + j.rsho.y) / 2 }, hm = { x: (j.lhip.x + j.rhip.x) / 2, y: (j.lhip.y + j.rhip.y) / 2 };
+  const w = wl ? {} : null; if (wl) for (const k in MP) w[k] = wl[MP[k]];
+  const px = (p) => ({ x: p.x * aspect, y: p.y });  // equal units in both axes
+  const okLeg = (side) => vis(j[side + 'hip']) && vis(j[side + 'kne']);
+  // Image-plane knee angles are unreliable from the front; keep them for display only.
+  const kneeL2 = okLeg('l') && vis(j.lank) ? angle(px(j.lhip), px(j.lkne), px(j.lank)) : null;
+  const kneeR2 = okLeg('r') && vis(j.rank) ? angle(px(j.rhip), px(j.rkne), px(j.rank)) : null;
+  // 3D knee angles from world landmarks work from any viewpoint.
+  const kneeL3 = w && okLeg('l') && vis(j.lank) ? angle3(w.lhip, w.lkne, w.lank) : null;
+  const kneeR3 = w && okLeg('r') && vis(j.rank) ? angle3(w.rhip, w.rkne, w.rank) : null;
+  const kneeL = kneeL3 ?? kneeL2, kneeR = kneeR3 ?? kneeR2;
+  const hipL = vis(j.lsho) && okLeg('l') ? (w ? angle3(w.lsho, w.lhip, w.lkne) : angle(px(j.lsho), px(j.lhip), px(j.lkne))) : null;
+  const hipR = vis(j.rsho) && okLeg('r') ? (w ? angle3(w.rsho, w.rhip, w.rkne) : angle(px(j.rsho), px(j.rhip), px(j.rkne))) : null;
+  const sm = px({ x: (j.lsho.x + j.rsho.x) / 2, y: (j.lsho.y + j.rsho.y) / 2 }), hm = px({ x: (j.lhip.x + j.rhip.x) / 2, y: (j.lhip.y + j.rhip.y) / 2 });
   const lean = Math.abs(Math.atan2(sm.x - hm.x, hm.y - sm.y) * 180 / Math.PI);
+  const torso = Math.hypot(sm.x - hm.x, sm.y - hm.y);
+  // Leg drop: how far the knees sit below the hips, in torso lengths. Seated from the front it is near 0.2 to 0.5; standing near 0.9 to 1.3.
+  const knees = [okLeg('l') ? j.lkne : null, okLeg('r') ? j.rkne : null].filter(Boolean);
+  const drop = knees.length && torso > 0.02 ? (knees.reduce((a, k) => a + px(k).y, 0) / knees.length - hm.y) / torso : null;
   const knee = kneeL != null && kneeR != null ? (kneeL + kneeR) / 2 : (kneeL ?? kneeR);
   const visible = Object.keys(MP).filter((k) => vis(j[k])).length;
-  return { j, kneeL, kneeR, hipL, hipR, lean, knee, visible };
+  return { j, kneeL, kneeR, hipL, hipR, lean, knee, knee3d: kneeL3 != null || kneeR3 != null, drop, visible };
 }
+// ---- pure end
 
 // ---------- rep counter: knee-angle hysteresis (same rule as the engine) ----------
 function stepCounter(m, now) {
-  if (m.knee == null) return;
-  C.smooth = C.smooth == null ? m.knee : C.smooth * 0.6 + m.knee * 0.4; const k = C.smooth;
-  C.leanPeak = Math.max(C.leanPeak, m.lean);
   const chair = $('exercise').value === 'chair';
-  if (C.state === 'idle') { C.state = k < P.downDeg ? 'seated' : 'standing'; C.leanPeak = 0; return; }
+  C.leanPeak = Math.max(C.leanPeak, m.lean || 0);
   if (chair) {
-    if (C.state === 'seated' && k > P.downDeg + 10) { C.state = 'rising'; C.downAt = now; C.leanPeak = m.lean; }
-    else if (C.state === 'rising') { if (k > P.upDeg) { C.state = 'standing'; C.upAt = now; } else if (k < P.downDeg) { C.state = 'seated'; shallow(k); } }
-    else if (C.state === 'standing' && k < P.upDeg - 15) { C.state = 'sitting'; C.minKnee = k; }
-    else if (C.state === 'sitting') { C.minKnee = Math.min(C.minKnee, k); if (k < P.downDeg) { finishRep(now, C.upAt - C.downAt, now - C.upAt); C.state = 'seated'; } else if (k > P.upDeg) C.state = 'standing'; }
+    if (m.drop == null) return;
+    C.smooth = C.smooth == null ? m.drop : C.smooth * 0.6 + m.drop * 0.4; const d = C.smooth;
+    const kneeOk = m.knee == null || !m.knee3d || m.knee > P.upDeg - 20;       // 3D knee confirms a full stand when available
+    const seatedNow = d < P.seatDrop, standingNow = d > P.standDrop && kneeOk;
+    if (C.state === 'idle') { C.state = seatedNow ? 'seated' : standingNow ? 'standing' : 'seated'; C.leanPeak = 0; return; }
+    if (C.state === 'seated' && d > P.seatDrop + 0.1) { C.state = 'rising'; C.downAt = now; C.leanPeak = m.lean; }
+    else if (C.state === 'rising') { if (standingNow) { C.state = 'standing'; C.upAt = now; } else if (seatedNow) { C.state = 'seated'; shallow(d, true); } }
+    else if (C.state === 'standing' && d < P.standDrop - 0.1) { C.state = 'sitting'; C.minKnee = m.knee ?? 0; }
+    else if (C.state === 'sitting') { if (seatedNow) { finishRep(now, C.upAt - C.downAt, now - C.upAt); C.state = 'seated'; } else if (standingNow) C.state = 'standing'; }
   } else {
+    if (m.knee == null) return;
+    C.smooth = C.smooth == null ? m.knee : C.smooth * 0.6 + m.knee * 0.4; const k = C.smooth;
+    if (C.state === 'idle') { C.state = k < P.downDeg ? 'bottom' : 'standing'; C.leanPeak = 0; return; }
     if (C.state === 'standing' && k < P.upDeg - 10) { C.state = 'down'; C.downAt = now; C.minKnee = k; C.leanPeak = m.lean; }
-    else if (C.state === 'down') { C.minKnee = Math.min(C.minKnee, k); if (k < P.downDeg) C.state = 'bottom'; else if (k > P.upDeg) { C.state = 'standing'; shallow(C.minKnee); } }
+    else if (C.state === 'down') { C.minKnee = Math.min(C.minKnee, k); if (k < P.downDeg) C.state = 'bottom'; else if (k > P.upDeg) { C.state = 'standing'; shallow(C.minKnee, false); } }
     else if (C.state === 'bottom') { C.minKnee = Math.min(C.minKnee, k); if (k > P.downDeg + 15) { C.state = 'up'; C.upAt = now; } }
     else if (C.state === 'up') { if (k > P.upDeg) { finishRep(now, now - C.downAt, 0); C.state = 'standing'; } }
   }
 }
 let shallowAt = 0;
-function shallow(k) { const now = performance.now(); if (now - shallowAt < 2500) return; shallowAt = now; flag('warm', 'Not a full rep', 'knee reached ' + Math.round(k) + '°'); homeSay('Nearly. All the way up, then down.', 'Take your time.'); }
+function shallow(v, isDrop) { const now = performance.now(); if (now - shallowAt < 2500) return; shallowAt = now; flag('warm', 'Not a full rep', isDrop ? 'leg drop reached ' + v.toFixed(2) + ' of ' + P.standDrop : 'knee reached ' + Math.round(v) + '°'); homeSay('Nearly. All the way up, then down.', 'Take your time.'); }
 function finishRep(now, riseMs, downMs) {
   C.reps += 1; const rise = riseMs / 1000, down = downMs / 1000; const flags = [];
   if (rise > P.slowS) flags.push('slow rise ' + rise.toFixed(1) + ' s'); if (C.leanPeak > P.leanDeg) flags.push('lean ' + Math.round(C.leanPeak) + '°');
@@ -281,9 +305,10 @@ function loop() {
     lastMs = performance.now() - t0;
   }
   const lm = lastResult && lastResult.landmarks && lastResult.landmarks[0];
+  const wl = lastResult && lastResult.worldLandmarks && lastResult.worldLandmarks[0];
   const X = (x) => (mirror ? 1 - x : x) * W, Y = (y) => y * H;
   if (lm) {
-    const m = measure(lm); const accent = css('--accent') || '#1f7a5c';
+    const m = measure(lm, wl, W / H); const accent = css('--accent') || '#1f7a5c';
     if (C.on && !C.paused) stepCounter(m, performance.now());
     const showSkel = !$('clinic').hidden || true;
     if (showSkel) {
@@ -297,11 +322,11 @@ function loop() {
       }
     }
     $('seen-pill').textContent = m.visible + '/17 joints'; $('seen-pill').className = 'pill ' + (m.visible >= 13 ? 'ok' : '');
-    $('hud').innerHTML = '<span>knee L ' + (m.kneeL == null ? '—' : Math.round(m.kneeL) + '°') + ' · R ' + (m.kneeR == null ? '—' : Math.round(m.kneeR) + '°') + '</span><span>trunk lean ' + Math.round(m.lean) + '° · state ' + C.state + '</span>';
+    $('hud').innerHTML = '<span>leg drop ' + (m.drop == null ? '—' : m.drop.toFixed(2)) + ' (seated < ' + P.seatDrop + ', standing > ' + P.standDrop + ')</span><span>knee' + (m.knee3d ? ' 3D' : '') + ' L ' + (m.kneeL == null ? '—' : Math.round(m.kneeL) + '°') + ' · R ' + (m.kneeR == null ? '—' : Math.round(m.kneeR) + '°') + ' · lean ' + Math.round(m.lean) + '°</span><span>state ' + C.state + '</span>';
     $('c-knee').innerHTML = (m.kneeL == null ? '—' : Math.round(m.kneeL)) + ' / ' + (m.kneeR == null ? '—' : Math.round(m.kneeR)) + ' <small>°</small>';
     $('c-hip').innerHTML = (m.hipL == null ? '—' : Math.round(m.hipL)) + ' / ' + (m.hipR == null ? '—' : Math.round(m.hipR)) + ' <small>°</small>';
-    $('c-lean').innerHTML = Math.round(m.lean) + ' <small>°</small>'; $('c-vis').innerHTML = m.visible + ' <small>/17</small>';
-    if (m.visible < 13 && C.on) homeSay('Step back a little so I can see all of you.', 'Your legs need to be in the picture.');
+    $('c-lean').innerHTML = Math.round(m.lean) + ' <small>°</small>'; $('c-drop').innerHTML = (m.drop == null ? '—' : m.drop.toFixed(2)) + ' <small>torso</small>'; $('c-vis').innerHTML = m.visible + ' <small>/17</small>';
+    if (C.on && (m.drop == null || m.visible < 9)) homeSay('Step back a little so I can see your hips and knees.', 'Ankles can be out of the picture; hips and knees cannot.');
   } else { $('seen-pill').textContent = 'no person'; $('seen-pill').className = 'pill'; }
   $('infer-pill').textContent = 'pose ' + lastMs.toFixed(0) + ' ms'; $('c-ms').innerHTML = lastMs.toFixed(0) + ' <small>ms</small>';
   [...document.querySelectorAll('#c-phase span')].forEach((s, i) => s.classList.toggle('on', i === ['seated', 'rising', 'standing', 'sitting'].indexOf(C.state) || i === ['standing', 'down', 'bottom', 'up'].indexOf(C.state)));
