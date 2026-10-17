@@ -16,7 +16,7 @@ The Mayo article describes five steps: assess your fitness level, design a progr
 | Get started | Guided session with warm-up, reps, rest, and stop-if-dizzy safety prompt | Rep counting, tempo, and range of motion: yes. Pain or dizziness: self-reported stop button | Guided session with live rep count and form cues |
 | Monitor progress | Retest after six weeks and compare to baseline | Yes, same tests | Session history and a baseline-versus-latest comparison screen |
 
-The hackathon demonstration is one guided session: the participant stands in front of the camera, the tracker recognizes the exercise phase, counts repetitions, gives a simple form cue from joint angles, and saves a session summary that the progress screen compares with the baseline. Everything runs locally on the laptop. The detailed requirements belong to the teammates' product requirements document; this page defines what the stack must support.
+Related clinical observations that the same keypoints can time or count are listed in [skeletal medical tests](../requirements/skeletal-medical-tests.md). That list does not add those tests to the hackathon demonstration. The hackathon demonstration is one guided session: the participant stands in front of the camera, the tracker recognizes the exercise phase, counts repetitions, gives a simple form cue from joint angles, and saves a session summary that the progress screen compares with the baseline. Everything runs locally on the laptop. The detailed requirements belong to the teammates' product requirements document; this page defines what the stack must support.
 
 ## Constraints
 
@@ -146,7 +146,7 @@ The dashboard is now React 19, TypeScript, and Vite with Bun as the package mana
 
 ### Storage and privacy
 
-SQLite through Python's standard library, one file under ignored `data/`, with tables for users (a role label, never a name), baselines, sessions, and rep events. Export to JSON for the presentation. No cloud service, no accounts, and no frames on disk by default.
+SQLite through Python's standard library, one file under ignored `data/`, with tables for users (a role label, never a name), baselines, sessions, and rep events. Export to JSON for the presentation. No cloud service, no accounts, and no frames on disk by default. The reasons for keeping frames on the machine are on the [on-device advantages](../requirements/on-device.md) page.
 
 ### Optional sensors and actuators
 
@@ -163,6 +163,7 @@ SQLite through Python's standard library, one file under ignored `data/`, with t
 | Frontend | Screens, state, visual design | [Frontend](#frontend) and the three message types; React 19 with Bun is the merged frontend stack; the frontend consumes, never computes, reps and scores |
 | Hardware and camera setup | Which camera, cables, drivers, measured frame rate | [Sensing](#sensing), [SH-Q-006](#sh-q-006--which-camera-serves-the-demonstration), and the hardware pages |
 | Presentation | Story, evidence, judging criteria | The [judging weights](../hackathon/judging-criteria.md#scoring): use case and impact 40, technical 25, on-device efficiency 15, deployment and documentation 10, presentation 10. The efficiency points need Tier 2 profiler evidence or an honest CPU measurement |
+| [Field sobriety example](../requirements/field-sobriety.md) | An additional example of the pose pipeline, not the product requirements document | Walk-and-turn and one-leg-stand observations. The hackathon product remains the fitness session in [What the product does](#what-the-product-does) |
 
 When those documents exist in this repository, link them from this table and from [the Wiki index](../index.md). Until then this page is the shared reference.
 

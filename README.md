@@ -4,6 +4,12 @@
 
 Development: see [Python and UI setup](Wiki/project.md#development-setup) for installation, commands, and package responsibilities.
 
+### Example applications
+
+The confirmed hackathon direction is the [camera-based fitness tracker](Wiki/design/tech-stack.md). The same local pose pipeline can watch other movement tasks. One example is a [field sobriety observation](Wiki/requirements/field-sobriety.md): the camera describes the walk-and-turn and the one-leg stand. That page is an example. It does not determine impairment, and it does not replace the fitness-tracker demonstration.
+
+The sections below are the previous assistive-control proposal.
+
 # SecondHands
 **Making the Physical World Accessible Through AI**
 
