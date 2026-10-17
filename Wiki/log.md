@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — YOLO pose ExecuTorch export recorded
+
+Added [the YOLO pose ExecuTorch export observation](experiments-before-saturday.md#yolo-pose-executorch-export-observation) from the new locked `experiments/yolo_pose_executorch.py` check, its [runbook section](runbooks/mac-and-snapdragon-development.md#run-the-yolo-pose-executorch-export-check), and the `just smoke-yolo-pose-executorch` recipe. Updated [the tech stack](design/tech-stack.md) perception, plan, and evidence text, noted the React and Bun frontend direction from the unmerged `dm/react-ui` branch, checked SH-T-049 in [the plan](plan.md#movement-tracker), and revised source SH-S-017. The run was in a Linux x86-64 container; Mac, laptop, and NPU execution remain unverified.
+
 ## 2026-10-17 — Movement tracker tech stack proposed
 
 Added [the movement tracker tech stack](design/tech-stack.md) for the user's camera-based fitness tracker request: article-to-feature mapping, sensing options for the available cameras, YOLO-pose through ExecuTorch with MediaPipe and Qualcomm AI Hub fallbacks, deterministic rep counting plus a small trained ExecuTorch classifier, three runtime tiers on Windows ARM64 with a checked package-availability table, the WebSocket interface contract, a document map for the requirements, design, and frontend teammates, a two-day plan, and risks. Opened SH-Q-005 (relation to SecondHands) and SH-Q-006 (demonstration camera). Added Phase 9 tasks SH-T-047 to SH-T-054 to [the plan](plan.md#movement-tracker), a direction entry in [Project direction](project.md#established-user-direction), pointers from [the design index](design/index.md), [the laptop page](hardware/snapdragon-x-elite.md#deployment-checks), and [the runbook](runbooks/mac-and-snapdragon-development.md#windows-arm64-compatibility-limit), and source record SH-S-017. Nothing ran on the laptop; the Mayo article page could not be fetched.

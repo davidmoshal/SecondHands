@@ -59,7 +59,9 @@ def predict(model, image, imgsz, repeats=5):
         start = time.perf_counter()
         model.predict(image, imgsz=imgsz, verbose=False, device="cpu")
         times.append((time.perf_counter() - start) * 1000)
-    keypoints = result.keypoints.data.cpu().numpy() if result.keypoints is not None else np.zeros((0, 17, 3))
+    keypoints = np.zeros((0, 17, 3))
+    if result.keypoints is not None:
+        keypoints = result.keypoints.data.cpu().numpy()
     boxes = result.boxes.xyxy.cpu().numpy() if result.boxes is not None else np.zeros((0, 4))
     return keypoints, boxes, float(np.median(times))
 
