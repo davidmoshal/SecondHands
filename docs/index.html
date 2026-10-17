@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SecondHands Prototypes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root { --bg: #f4f1ea; --panel: #fff; --fg: #1f2a24; --muted: #5f6b64; --line: #dcd7cc; --accent: #1f7a5c; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #141815; --panel: #1c211d; --fg: #ebeee9; --muted: #a3ada6; --line: #333b35; --accent: #6fcaa7; color-scheme: dark; } }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: "IBM Plex Sans", system-ui, sans-serif; padding: 32px 16px 64px; line-height: 1.5; }
+  main { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+  h1 { margin: 0; font-size: 1.8rem; }
+  p { margin: 0; color: var(--muted); }
+  a.card { display: grid; gap: 4px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: inherit; text-decoration: none; }
+  a.card:hover { border-color: var(--accent); }
+  a.card b { font-size: 1.05rem; }
+  a.card span { color: var(--muted); font-size: 0.95rem; }
+  footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>SecondHands prototypes</h1>
+  <p>Interactive mock-ups and reference pages for the on-device movement assessment platform. The camera feed and keypoints in the prototypes are simulated; the counting and scoring rules are the real design. The repository Wiki is the source of truth.</p>
+  <a class="card" href="live.html"><b>Live: your camera, a real pose model</b><span>Opens your webcam, runs MediaPipe Pose in the browser, draws the skeleton, and counts chair stands or squats with the same knee-angle rule, in Home or Clinic view. Nothing leaves your device.</span></a>
+  <a class="card" href="companion.html"><b>Companion: Home and Clinic views</b><span>One chair-stand engine, two audiences: a large-type Home view with one instruction at a time, and a detailed Clinic view with overlays, per-rep measurements, editable thresholds, and notes.</span></a>
+  <a class="card" href="console.html"><b>Clinic console prototype</b><span>Session, clinical tests (single-leg stance with live sway), progress, protocols, and device status.</span></a>
+  <a class="card" href="architecture.html"><b>Architecture walkthrough</b><span>Data flow, the two-process layout for the Snapdragon NPU, model choices, the Qualcomm handoff, the interface contract, and the two-day plan.</span></a>
+  <a class="card" href="brief.html"><b>Project brief</b><span>Use cases, end-to-end process, interface sketches, clinician-owned benchmarks, ownership, and reach.</span></a>
+  <a class="card" href="workflow.html"><b>Team workflow</b><span>Project structure, separation of concerns, Git rules, sharing the Tailscale-connected laptop, and where each model comes from.</span></a>
+  <footer>Published from the <code>docs/</code> folder of the SecondHands repository through GitHub Pages. Thresholds shown anywhere are placeholders until the clinicians set them.</footer>
+</main>
+</body>
+</html>

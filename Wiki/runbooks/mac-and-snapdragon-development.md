@@ -258,6 +258,36 @@ Then start `just dev-api` and `just dev-ui` in that session and open `http://loc
 
 **Other useful routes.** Remote Desktop: enable it in Windows Settings under System, Remote Desktop, then connect with Microsoft Remote Desktop on the Mac to `qcworkshop27.tail2122cc.ts.net`. Files: `scp file <windows-account>@qcworkshop27.tail2122cc.ts.net:C:/Users/<account>/` or Tailscale's Taildrop. VS Code Remote SSH works against Windows OpenSSH hosts and gives an editor on the laptop's checkout. Tailscale Funnel, which publishes a service to the public internet, is not needed and should stay off.
 
+**Before leaving the laptop unattended.** Tailscale on Windows disconnects when the user signs out unless it is set to run unattended, and a laptop that sleeps is unreachable. On the laptop, before walking away:
+
+1. In the Tailscale tray menu, open Preferences and turn on **Run unattended**. Confirm the device still shows as connected.
+2. Keep the laptop on mains power and stop it sleeping, in an administrator PowerShell:
+
+   ```powershell
+   powercfg /change standby-timeout-ac 0
+   powercfg /change hibernate-timeout-ac 0
+   powercfg /change monitor-timeout-ac 10
+   powercfg /setacvalueindex SCHEME_CURRENT SUB_BUTTONS LIDACTION 0
+   powercfg /setactive SCHEME_CURRENT
+   Get-Service sshd | Select-Object Status, StartType
+   tailscale ip -4
+   ```
+
+   The lid-action value `0` means closing the lid does nothing. `sshd` must show `Running` and `Automatic`. Note the Tailscale IPv4 address as a fallback in case MagicDNS does not resolve from a new network.
+3. Lock the screen (Windows key + L) rather than signing out. Signing out ends any running dashboard.
+4. Leave the camera connected and the USB cable seated; a reconnect cannot be done remotely.
+
+**Two-minute test from the Mac before you go**, while still on site, then again from home:
+
+```sh
+tailscale status | grep -i qcworkshop27
+tailscale ping qcworkshop27.tail2122cc.ts.net
+ssh <windows-account>@qcworkshop27.tail2122cc.ts.net "hostname; uv --version; git -C C:/sh/SecondHands log --oneline -1"
+ssh -L 5173:127.0.0.1:5173 -L 8765:127.0.0.1:8765 <windows-account>@qcworkshop27.tail2122cc.ts.net
+```
+
+The first three commands should return the device as online, a ping round trip, and the hostname with the checkout's latest commit; adjust the checkout path if the steward chose another. The last command opens the forwarded session for the dashboard. From home, the Mac must be signed in to the same tailnet; if `tailscale ping` fails but `tailscale status` lists the laptop as offline, the laptop slept or Tailscale stopped, and someone on site has to wake it. The hosted development session used for this documentation runs outside the tailnet and cannot perform this test; only a tailnet member's computer can.
+
 **Record the result.** After the first successful connection, record in [the plan](../plan.md#snapdragon-deployment) which Mac connected, whether password or key authentication was used, whether `ssh` reconnects after the laptop restarts, and the dashboard-forwarding result. No connection has been verified in this repository yet; the procedure above is derived from the vendors' documentation and the reported hostname.
 
 ## Run PC commands through T3
