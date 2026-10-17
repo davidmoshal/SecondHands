@@ -160,6 +160,20 @@ Expected final JSON includes `status: passed`, `backend: ["XnnpackBackend"]`, an
 
 The command was exercised on the Mac on 2026-10-16. See [the exact observation](../experiments-before-saturday.md#executorch-cpu-smoke-observation) and [the runtime design](../design/runtime-stack.md) for evidence limits and the different Qualcomm deployment path. Do not use this CPU artifact as a claimed Snapdragon NPU model.
 
+## Run the YOLO pose ExecuTorch export check
+
+From the repository root:
+
+```sh
+just smoke-yolo-pose-executorch
+```
+
+This runs `uv run --locked --script experiments/yolo_pose_executorch.py yolo11n-pose.pt 640`. The script's inline metadata and adjacent `.py.lock` select an isolated environment with Ultralytics, ExecuTorch 1.5.1, and CPU-only PyTorch 2.14.1 from the PyTorch CPU package index, which also carries native Windows ARM64 PyTorch wheels. The root application environment is not changed. The first run downloads the pretrained `yolo11n-pose.pt` weights, which Ultralytics distributes under AGPL-3.0, and a public sample image into ignored `artifacts/yolo-pose/`.
+
+The script exports the model with Ultralytics' ExecuTorch integration, predicts the sample image through PyTorch and through the exported `.pte`, and then feeds one identical letterboxed tensor through the PyTorch model and the ExecuTorch Python runtime. Expected final JSON includes `status: passed`, a `raw_max_abs_diff` well below `0.05`, and equal person counts. The prediction-level `max_keypoint_pixel_diff` can be tens of pixels because Ultralytics letterboxes the PyTorch model to a rectangular input and the exported model to a fixed square; it is not an export error on its own. Results are also written to ignored `artifacts/results/yolo-pose-executorch.json`.
+
+Pass another Ultralytics pose checkpoint or input size as arguments, for example `uv run --locked --script experiments/yolo_pose_executorch.py yolo26n-pose.pt 320`. Timings are CPU timings on the running machine. See [the recorded observation](../experiments-before-saturday.md#yolo-pose-executorch-export-observation) and [the tech stack](../design/tech-stack.md#perception-pose-estimation) for what this does and does not establish. On the Snapdragon laptop, run it from x64 Python under emulation until a native ExecuTorch runtime is built; the ExecuTorch Python package has no Windows ARM64 wheel.
+
 ## Prepare the Snapdragon checkout at the hackathon
 
 Clone the same repository on the PC, then enter that checkout:

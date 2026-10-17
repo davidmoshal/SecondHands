@@ -20,6 +20,10 @@ smoke-python:
 smoke-executorch:
     uv run --locked --script experiments/executorch_cpu_smoke.py
 
+# Export YOLO11n-pose to an ExecuTorch XNNPACK .pte and compare it with PyTorch on the CPU.
+smoke-yolo-pose-executorch:
+    uv run --locked --script experiments/yolo_pose_executorch.py yolo11n-pose.pt 640
+
 # Install the locked UI dependencies.
 setup-ui:
     pnpm --dir ui install --frozen-lockfile
