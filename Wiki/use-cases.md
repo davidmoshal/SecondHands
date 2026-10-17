@@ -2,7 +2,7 @@
 
 **Status:** recorded on 2026-10-17 from the user's direction. The clinicians (MDs) on the team own the test protocols, metrics, thresholds, and benchmarks; the platform is a shared engine that scores clinician-defined movement tests, with further applications beyond general fitness. This page owns the use-case catalog, the protocol template, and the proposed ownership map. Thresholds and protocols below are placeholders until the clinicians supply them. [The tech stack](design/tech-stack.md) owns the architecture; [the plan](plan.md#movement-tracker) owns task status.
 
-Two shareable companion pages were published for the team on 2026-10-17: [the project brief](https://claude.ai/artifact/2gnYWwfqMh4ZTrJrz2u5iQ) with the process, interface sketches, benchmarks table, and ownership, and [the architecture walkthrough](https://claude.ai/artifact/PMN1kdP24iQBhRaxZJrvz3). They are presentations of this Wiki, not separate sources of requirements.
+Two shareable companion pages were published for the team on 2026-10-17: [the project brief](https://claude.ai/artifact/2gnYWwfqMh4ZTrJrz2u5iQ) with the process, interface sketches, benchmarks table, and ownership, [the architecture walkthrough](https://claude.ai/artifact/PMN1kdP24iQBhRaxZJrvz3), and [the interactive console prototype](https://claude.ai/artifact/CQdDefYFJcuS6qYVJN4K9B), which runs the rep-counting hysteresis rule and the single-leg-stance scoring on a simulated skeleton with editable protocol thresholds. They are presentations of this Wiki, not separate sources of requirements; the prototype's screens are the reference for [the frontend work](plan.md#movement-tracker).
 
 ## Principle
 
