@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Tailscale access procedure added
+
+Added [the Tailscale access section](runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale) to the runbook with the user-reported laptop name `qcworkshop27.tail2122cc.ts.net`, Windows OpenSSH Server setup, Mac connection and port-forwarding commands, and the Tailscale SSH limitation on Windows. Updated SH-T-036 in [the plan](plan.md#snapdragon-deployment), [Project direction](project.md#established-user-direction), [the laptop page](hardware/snapdragon-x-elite.md#deployment-checks), and source record SH-S-018. The procedure is documentation-derived; no connection has been tested.
+
 ## 2026-10-17 — Fitness tracker confirmed as the project direction
 
 Recorded the user's confirmation that the camera-based fitness tracker is the project and the assistive-control pages are a previous idea awaiting the team's update. Resolved SH-Q-005 in [the tech stack](design/tech-stack.md#sh-q-005--how-does-the-movement-tracker-relate-to-secondhands) with its alternatives preserved, re-scoped SH-T-047 in [the plan](plan.md#movement-tracker) to the Wiki update, added the decision to [Project direction](project.md#established-user-direction), pointed [the index](index.md) at the tracker first, and added superseded notices to [the proposal](proposal.md) and the README. No older page was rewritten.

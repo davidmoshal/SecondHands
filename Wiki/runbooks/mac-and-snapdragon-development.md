@@ -211,6 +211,53 @@ The PC command above updates the base Python environment. Enable an optional mod
 
 If editing on the PC, commit and push there, then pull on the Mac. Use separate branches when both machines are making changes concurrently. After pulling on the Mac, use `uv sync --locked --extra pytorch` to retain its PyTorch development environment.
 
+## Access the Snapdragon laptop over Tailscale
+
+Tailscale is a mesh virtual private network: each signed-in device gets a private address and a MagicDNS name that only members of the same tailnet can reach. The user reported on 2026-10-17 that Tailscale is installed on the Dell Snapdragon laptop and that its MagicDNS name is `qcworkshop27.tail2122cc.ts.net`. That name resolves only for devices signed in to the same tailnet; it is not a public address. The name is recorded because the user supplied it for team use; keep the tailnet's user accounts, authentication keys, and Windows account names out of Git.
+
+Tailscale's built-in SSH server runs only on Linux and on macOS with the open-source `tailscaled` variant, so it cannot accept connections on the Windows laptop ([Tailscale SSH documentation](https://tailscale.com/kb/1193/tailscale-ssh)). Use Tailscale for the network path and Windows' own OpenSSH Server for the shell. Remote Desktop also works over the same path when a graphical window is needed, such as a camera viewer.
+
+**One-time setup on the laptop**, in an administrator PowerShell, following [Microsoft's OpenSSH guide](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse):
+
+```powershell
+Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+Start-Service sshd
+Set-Service -Name sshd -StartupType 'Automatic'
+Get-NetFirewallRule -Name 'OpenSSH-Server-In-TCP'
+tailscale status
+```
+
+The firewall rule is created by the installation and allows inbound port 22; Tailscale traffic arrives on the laptop's Tailscale interface, so no router or public port is opened. `tailscale status` should list the laptop as online with the name above. Optionally set PowerShell as the default SSH shell so `just` and `uv` behave as in a local terminal:
+
+```powershell
+New-ItemProperty -Path 'HKLM:\SOFTWARE\OpenSSH' -Name DefaultShell -Value 'C:\Program Files\PowerShell\7\pwsh.exe' -PropertyType String -Force
+```
+
+Use the installed PowerShell path on that machine; Windows PowerShell 5.1 is at `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`.
+
+**On each Mac**, install Tailscale from [the download page](https://tailscale.com/download) or `brew install --cask tailscale`, sign in to the same tailnet, then check reachability and connect:
+
+```sh
+tailscale status
+tailscale ping qcworkshop27.tail2122cc.ts.net
+ssh <windows-account>@qcworkshop27.tail2122cc.ts.net
+```
+
+Replace `<windows-account>` with the laptop's Windows user name; a Microsoft-account sign-in uses the short local name shown by `whoami` on the laptop, and the password is the account password. Accept the host key on first connection. To stop typing the password, note that `ssh-copy-id` does not work against Windows OpenSSH; instead append your Mac public key to `C:\ProgramData\ssh\administrators_authorized_keys` for administrator accounts or `C:\Users\<account>\.ssh\authorized_keys` for standard accounts, as the Microsoft guide describes.
+
+**Run SecondHands commands remotely.** After connecting, change to the laptop's checkout and use the same commands as the [Snapdragon checkout procedure](#prepare-the-snapdragon-checkout-at-the-hackathon). To view the laptop's dashboard in a Mac browser, forward the two loopback ports when connecting:
+
+```sh
+ssh -L 5173:127.0.0.1:5173 -L 8765:127.0.0.1:8765 <windows-account>@qcworkshop27.tail2122cc.ts.net
+```
+
+Then start `just dev-api` and `just dev-ui` in that session and open `http://localhost:5173` on the Mac. The services bind to loopback on the laptop and allow the `http://localhost:5173` origin, so forwarding keeps the existing security settings; nothing is exposed on the tailnet beyond SSH. The camera is the laptop's; the browser only displays results.
+
+**Other useful routes.** Remote Desktop: enable it in Windows Settings under System, Remote Desktop, then connect with Microsoft Remote Desktop on the Mac to `qcworkshop27.tail2122cc.ts.net`. Files: `scp file <windows-account>@qcworkshop27.tail2122cc.ts.net:C:/Users/<account>/` or Tailscale's Taildrop. VS Code Remote SSH works against Windows OpenSSH hosts and gives an editor on the laptop's checkout. Tailscale Funnel, which publishes a service to the public internet, is not needed and should stay off.
+
+**Record the result.** After the first successful connection, record in [the plan](../plan.md#snapdragon-deployment) which Mac connected, whether password or key authentication was used, whether `ssh` reconnects after the laptop restarts, and the dashboard-forwarding result. No connection has been verified in this repository yet; the procedure above is derived from the vendors' documentation and the reported hostname.
+
 ## Run PC commands through T3
 
 Install T3 and configure the chosen coding-agent provider on the PC. Connect the Mac to that PC environment through T3 Connect or network pairing, following [T3's remote-access instructions](https://github.com/pingdotgg/t3code/blob/main/docs/user/remote-access.md). The documented automatic desktop-managed SSH setup targets Linux and Apple Silicon Mac hosts; use the Windows installation and pairing route for this PC.

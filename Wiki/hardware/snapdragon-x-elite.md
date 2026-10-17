@@ -33,7 +33,7 @@ The [movement tracker tech stack](../design/tech-stack.md#runtime-on-the-snapdra
 
 Use the [Compute deployment procedure](../hackathon-compute.md#compute-deployment-and-verification) for the supplied ExecuTorch baseline. The event guide describes the expected stack; only tests on this laptop can establish what is installed and working.
 
-Use the [Mac and Snapdragon development runbook](../runbooks/mac-and-snapdragon-development.md) for separate environments, Git synchronization, and remote execution. Successful Mac model runs do not establish Windows compatibility or NPU execution.
+Use the [Mac and Snapdragon development runbook](../runbooks/mac-and-snapdragon-development.md) for separate environments, Git synchronization, and remote execution. The laptop is reported to be on the team's Tailscale network as `qcworkshop27.tail2122cc.ts.net`; [the Tailscale access section](../runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale) gives the SSH and dashboard-forwarding procedure. Successful Mac model runs do not establish Windows compatibility or NPU execution.
 
 For [Orbbec Femto Bolt](femto-bolt.md), first establish capture on the x86 Windows laptop, then repeat the tests on this Dell. The x86 reference laptop and this Snapdragon deployment laptop are separate test targets. Record camera, Python, model, and dashboard results separately so a successful camera connection is not mistaken for a working inference pipeline.
 
