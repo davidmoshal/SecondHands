@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Tailscale local install status recorded
+
+Added a [local installs table](references/tailscale.md#local-installs) to the Tailscale reference: the Dell laptop is reported installed, and the project owner's Mac was checked and has no Tailscale installation. The install steps stay in [the runbook](runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale). No connection was tested.
+
 ## 2026-10-17 — Team workflow and laptop sharing documented
 
 Added [the team workflow runbook](runbooks/team-workflow.md): project structure with proposed `perception`, `analysis`, `protocols`, and `storage` modules, the separation-of-concerns table with owners, Git collaboration rules, rules for sharing the Tailscale-connected Snapdragon laptop (steward, exclusive camera, proposed paths and ports, environment discipline), and the model acquisition table with ExecuTorch status. Noted the port 8765 conflict between the API and the depth bridge viewer and added SH-T-059. Linked from the index; source SH-S-028.
