@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Team workflow and laptop sharing documented
+
+Added [the team workflow runbook](runbooks/team-workflow.md): project structure with proposed `perception`, `analysis`, `protocols`, and `storage` modules, the separation-of-concerns table with owners, Git collaboration rules, rules for sharing the Tailscale-connected Snapdragon laptop (steward, exclusive camera, proposed paths and ports, environment discipline), and the model acquisition table with ExecuTorch status. Noted the port 8765 conflict between the API and the depth bridge viewer and added SH-T-059. Linked from the index; source SH-S-023.
+
 ## 2026-10-17 — Interactive console prototype linked
 
 Published an interactive prototype of the clinic console (live session with simulated skeleton and the real knee-angle hysteresis rep counter, single-leg stance test with live sway and events, progress chart, editable protocol thresholds, device status) and linked it from [use cases](use-cases.md) and [the tech stack frontend section](design/tech-stack.md#frontend). Camera and keypoints in the prototype are simulated; it is a reference for the frontend, not a measurement.
