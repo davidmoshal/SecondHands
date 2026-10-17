@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Live camera page added to GitHub Pages
+
+Added `docs/live.html`: camera selection, MediaPipe Pose Landmarker (lite) in the browser, skeleton and angle overlay, and the knee-angle hysteresis counter for chair stands and squats in Home and Clinic views, with editable thresholds and a visible runtime badge stating that this is the browser model, not ExecuTorch. Verified in headless Chromium with a fake camera: model load, camera open, set start, no page errors. Linked from the site index, [use cases](use-cases.md), and [the tech stack](design/tech-stack.md#frontend).
+
 ## 2026-10-17 — Overall plan by workstream and implementation briefs
 
 Restructured [the plan](plan.md) around nine workstreams (clinical protocols, laptop, perception and NPU, analysis, service and storage, frontend, data and benchmarks, demonstration, documentation) with owners, a dependency graph, and the event timeline; moved the assistive-control phases under a previous-idea section without deleting them; added SH-T-060 to SH-T-067. Added [implementation briefs](design/implementation-briefs.md) with a self-contained specification per engineering task. Linked both from the index and the design index; source SH-S-029.
