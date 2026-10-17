@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Live page counts chair stands from leg drop
+
+The live camera page did not count sit-to-stands from a frontal camera because the two-dimensional knee angle stays near 145° while seated. Changed the chair-stand rule to the leg drop (knee-to-hip height in torso lengths, seated below 0.55, standing above 0.85, both editable in the Clinic view), added knee angles from MediaPipe's three-dimensional world landmarks as the sanity check and for display, and verified the new rule on synthetic frontal poses (two reps counted, a shallow attempt ignored) and the page in headless Chromium. Recorded the finding in [brief D1](design/implementation-briefs.md#d1--analysis-angles-rep-counter-scorers) so the Python engine uses the same signal.
+
 ## 2026-10-17 — Leaving the laptop unattended and the Tailscale test
 
 Added to [the Tailscale section of the runbook](runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale) the steps that keep the laptop reachable overnight (Tailscale run unattended, no sleep on mains, lid action, sshd automatic, lock instead of sign out) and a two-minute connectivity test to run from a Mac before leaving and again from home. The hosted session cannot run the test itself because it is outside the tailnet.
