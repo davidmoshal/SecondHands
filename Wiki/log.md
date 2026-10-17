@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Leaving the laptop unattended and the Tailscale test
+
+Added to [the Tailscale section of the runbook](runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale) the steps that keep the laptop reachable overnight (Tailscale run unattended, no sleep on mains, lid action, sshd automatic, lock instead of sign out) and a two-minute connectivity test to run from a Mac before leaving and again from home. The hosted session cannot run the test itself because it is outside the tailnet.
+
 ## 2026-10-17 — Workstream issues linked
 
 Created GitHub issues #19 to #26 for workstreams A to G and I in the transferred `SecondHands-AI/SecondHands` repository and linked them from [the plan](plan.md); recorded the new repository address in [the team workflow](runbooks/team-workflow.md#how-we-collaborate-in-git).
