@@ -10,7 +10,7 @@ Compare candidate decision models on SecondHands movements before access to the 
 
 ## Models and observations
 
-This is the earlier three-model comparison proposal. The [model reference index](references/models/index.md#recommended-starting-order) owns the newer five-candidate starting recommendation and the retained research leads. Recording that recommendation does not by itself revise this proposed benchmark or claim completed experiments.
+This is the earlier three-model comparison proposal. The [model reference index](references/models/index.md#recommended-starting-order) owns the newer five-candidate starting recommendation, the retained research leads, and the later [skeletal tracking leads](references/models/index.md#skeletal-tracking-leads). Recording those references does not by itself revise this proposed benchmark or claim completed experiments.
 
 On 2026-10-16, the user requested about five candidate integrations on the Mac before porting. The [runtime design](design/runtime-stack.md#five-candidate-integrations) explains that expanded exploration and its different model roles. The original comparison below remains a preserved proposal, not a completed evaluation or a requirement to replace SmolVLM with MobileCLIP2.
 

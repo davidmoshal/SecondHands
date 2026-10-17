@@ -1,6 +1,6 @@
 # Pose model candidates and the Qualcomm handoff
 
-**Status:** written on 2026-10-17 after Qualcomm staff at the hackathon recommended RTMPose and offered to help convert models for ExecuTorch on the Snapdragon NPU. This page compares the pose models worth trying, states which parts need training, and lists exactly what to hand to the Qualcomm engineer. Facts come from the sources linked beside them; only the YOLO11n-pose CPU export has run in this project ([observation](../../experiments-before-saturday.md#yolo-pose-executorch-export-observation)). [The tech stack](../../design/tech-stack.md) owns the overall architecture; this page owns model identities and the conversion handoff.
+**Status:** written on 2026-10-17 after Qualcomm staff at the hackathon recommended RTMPose and offered to help convert models for ExecuTorch on the Snapdragon NPU. This page compares the pose models worth trying, states which parts need training, and lists exactly what to hand to the Qualcomm engineer. Facts come from the sources linked beside them; only the YOLO11n-pose CPU export has run in this project ([observation](../../experiments-before-saturday.md#yolo-pose-executorch-export-observation)). [The tech stack](../../design/tech-stack.md) owns the overall architecture; this page owns the comparison and the conversion handoff. Design and author-reported scores for RTMPose, RTMO, RTMW, RTMW3D, and SimCC are on the [skeletal tracking pages](index.md#skeletal-tracking-leads).
 
 ## Candidates
 

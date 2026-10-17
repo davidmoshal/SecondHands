@@ -1,5 +1,13 @@
 # Wiki change log
 
+## 2026-10-17 — RTMPose-family skeletal tracking references
+
+Added source-checked pages for [RTMPose](references/models/rtmpose.md), [RTMO](references/models/rtmo.md), [RTMW](references/models/rtmw.md), [RTMW3D](references/models/rtmw3d.md), and [SimCC](references/models/simcc.md), and linked them from [the model index](references/models/index.md#skeletal-tracking-leads). The supplied summary's citation redirects were not used. Author benchmarks stay labeled as author-reported, including the RTMPose whole-body result of 67.0% AP and the later RTMW-l result of 70.1 AP. The Snapdragon 865 phone figure is distinguished from the Dell Snapdragon X Elite laptop. Updated navigation, [SH-Q-001](project.md#sh-q-001--model-and-runtime-selection), and source SH-S-023. Linked the existing [pose-candidate comparison](references/models/pose-candidates.md). No model was installed or run.
+
+## 2026-10-17 — Tailscale invitation recorded
+
+Added the user-supplied invitation and reported availability to [the Tailscale reference](references/tailscale.md). Linked the existing [runbook access procedure](runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale), documented the invitation's public visibility if published, and added navigation and source SH-S-022. No invitation acceptance or remote connection test was performed.
+
 ## 2026-10-17 — Pose candidates and Qualcomm handoff added
 
 Added [pose model candidates and the Qualcomm handoff](references/models/pose-candidates.md) after Qualcomm staff recommended RTMPose: a comparison of RTMPose, YOLO-pose, RTMO, MediaPipe Pose, HRNet/LiteHRNet, Posenet, MoveNet, and ViTPose with their ExecuTorch routes and NPU evidence, what needs training, and the handoff pack. Added the untested `experiments/qnn_export_pose.py` recipe, a Qualcomm section and RTMPose row in [the tech stack](design/tech-stack.md#working-with-the-qualcomm-engineer), a pointer from [the model index](references/models/index.md), SH-T-056 in [the plan](plan.md#movement-tracker), and source SH-S-021. No conversion was run.
