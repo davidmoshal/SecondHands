@@ -1,4 +1,6 @@
-> **Status:** Current proposal, supplied by the user on 2026-10-14. Its camera selection was updated to Orbbec Femto Bolt at the user's request on 2026-10-17. It describes intended capabilities, not verified implementation. Technical and market-size claims have not been independently checked in this documentation update. See [Project direction](Wiki/project.md) for the relation to earlier decisions and remaining evidence gaps.
+> **Direction change, 2026-10-17:** the team is now building a camera-based fitness tracker on the Snapdragon laptop with ExecuTorch; see [the movement tracker tech stack](Wiki/design/tech-stack.md). The text below describes the previous assistive-control idea and will be rewritten.
+>
+> **Status:** Previous proposal, supplied by the user on 2026-10-14. Its camera selection was updated to Orbbec Femto Bolt at the user's request on 2026-10-17. It describes intended capabilities, not verified implementation. Technical and market-size claims have not been independently checked in this documentation update. See [Project direction](Wiki/project.md) for the relation to earlier decisions and remaining evidence gaps.
 
 Development: see [Python and UI setup](Wiki/project.md#development-setup) for installation, commands, and package responsibilities.
 

@@ -1,5 +1,7 @@
 > **Status:** Current proposal, supplied by the user on 2026-10-14. Its camera selection was updated to Orbbec Femto Bolt at the user's request on 2026-10-17. It describes intended capabilities, not verified implementation. Technical and market-size claims have not been independently checked in this documentation update. See [Project direction](project.md) for the relation to earlier decisions and remaining evidence gaps.
 
+> **Superseded on 2026-10-17.** The user confirmed that the project is now a camera-based fitness tracker; see [the movement tracker tech stack](design/tech-stack.md). This page is retained as the previous idea until the team rewrites it under [SH-T-048](plan.md#movement-tracker).
+
 # SecondHands
 **Making the Physical World Accessible Through AI**
 

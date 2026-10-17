@@ -1,5 +1,7 @@
 # Model references
 
+**Pose estimation for the movement tracker:** see [pose model candidates and the Qualcomm handoff](pose-candidates.md), added on 2026-10-17 after Qualcomm staff recommended RTMPose.
+
 This index owns the SecondHands model candidates, their suggested roles, and the current recommended order. The user requested this reference on 2026-10-16, supplying the five-candidate recommendation below. Recording that recommendation does not establish a final model/runtime selection or a tested deployment. [SH-Q-001](../../project.md#sh-q-001--model-and-runtime-selection) owns that decision; the [task plan](../../plan.md) owns execution status.
 
 The first inputs are the computer's built-in camera, as recorded in [Project direction](../../project.md#established-user-direction). All five starting candidates now run on public sample images on the Mac. [The image observations](../../experiments-before-saturday.md#decision-model-image-observations) separate execution checks from accuracy evaluation and record false face classifications from Laya and SmolVLM. Camera operation, participant accuracy, and Windows execution remain open. The earlier Python CPU tensor check is not a model evaluation.

@@ -162,6 +162,20 @@ Expected final JSON includes `status: passed`, `backend: ["XnnpackBackend"]`, an
 
 The command was exercised on the Mac on 2026-10-16. See [the exact observation](../experiments-before-saturday.md#executorch-cpu-smoke-observation) and [the runtime design](../design/runtime-stack.md) for evidence limits and the different Qualcomm deployment path. Do not use this CPU artifact as a claimed Snapdragon NPU model.
 
+## Run the YOLO pose ExecuTorch export check
+
+From the repository root:
+
+```sh
+just smoke-yolo-pose-executorch
+```
+
+This runs `uv run --locked --script experiments/yolo_pose_executorch.py yolo11n-pose.pt 640`. The script's inline metadata and adjacent `.py.lock` select an isolated environment with Ultralytics, ExecuTorch 1.5.1, and CPU-only PyTorch 2.14.1 from the PyTorch CPU package index, which also carries native Windows ARM64 PyTorch wheels. The root application environment is not changed. The first run downloads the pretrained `yolo11n-pose.pt` weights, which Ultralytics distributes under AGPL-3.0, and a public sample image into ignored `artifacts/yolo-pose/`.
+
+The script exports the model with Ultralytics' ExecuTorch integration, predicts the sample image through PyTorch and through the exported `.pte`, and then feeds one identical letterboxed tensor through the PyTorch model and the ExecuTorch Python runtime. Expected final JSON includes `status: passed`, a `raw_max_abs_diff` well below `0.05`, and equal person counts. The prediction-level `max_keypoint_pixel_diff` can be tens of pixels because Ultralytics letterboxes the PyTorch model to a rectangular input and the exported model to a fixed square; it is not an export error on its own. Results are also written to ignored `artifacts/results/yolo-pose-executorch.json`.
+
+Pass another Ultralytics pose checkpoint or input size as arguments, for example `uv run --locked --script experiments/yolo_pose_executorch.py yolo26n-pose.pt 320`. Timings are CPU timings on the running machine. See [the recorded observation](../experiments-before-saturday.md#yolo-pose-executorch-export-observation) and [the tech stack](../design/tech-stack.md#perception-pose-estimation) for what this does and does not establish. On the Snapdragon laptop, run it from x64 Python under emulation until a native ExecuTorch runtime is built; the ExecuTorch Python package has no Windows ARM64 wheel.
+
 ## Prepare the Snapdragon checkout at the hackathon
 
 Clone the same repository on the PC, then enter that checkout:
@@ -199,6 +213,53 @@ The PC command above updates the base Python environment. Enable an optional mod
 
 If editing on the PC, commit and push there, then pull on the Mac. Use separate branches when both machines are making changes concurrently. After pulling on the Mac, use `uv sync --locked --extra pytorch` to retain its PyTorch development environment.
 
+## Access the Snapdragon laptop over Tailscale
+
+Tailscale is a mesh virtual private network: each signed-in device gets a private address and a MagicDNS name that only members of the same tailnet can reach. The user reported on 2026-10-17 that Tailscale is installed on the Dell Snapdragon laptop and that its MagicDNS name is `qcworkshop27.tail2122cc.ts.net`. That name resolves only for devices signed in to the same tailnet; it is not a public address. The name is recorded because the user supplied it for team use; keep the tailnet's user accounts, authentication keys, and Windows account names out of Git.
+
+Tailscale's built-in SSH server runs only on Linux and on macOS with the open-source `tailscaled` variant, so it cannot accept connections on the Windows laptop ([Tailscale SSH documentation](https://tailscale.com/kb/1193/tailscale-ssh)). Use Tailscale for the network path and Windows' own OpenSSH Server for the shell. Remote Desktop also works over the same path when a graphical window is needed, such as a camera viewer.
+
+**One-time setup on the laptop**, in an administrator PowerShell, following [Microsoft's OpenSSH guide](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse):
+
+```powershell
+Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+Start-Service sshd
+Set-Service -Name sshd -StartupType 'Automatic'
+Get-NetFirewallRule -Name 'OpenSSH-Server-In-TCP'
+tailscale status
+```
+
+The firewall rule is created by the installation and allows inbound port 22; Tailscale traffic arrives on the laptop's Tailscale interface, so no router or public port is opened. `tailscale status` should list the laptop as online with the name above. Optionally set PowerShell as the default SSH shell so `just` and `uv` behave as in a local terminal:
+
+```powershell
+New-ItemProperty -Path 'HKLM:\SOFTWARE\OpenSSH' -Name DefaultShell -Value 'C:\Program Files\PowerShell\7\pwsh.exe' -PropertyType String -Force
+```
+
+Use the installed PowerShell path on that machine; Windows PowerShell 5.1 is at `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`.
+
+**On each Mac**, install Tailscale from [the download page](https://tailscale.com/download) or `brew install --cask tailscale`, sign in to the same tailnet, then check reachability and connect:
+
+```sh
+tailscale status
+tailscale ping qcworkshop27.tail2122cc.ts.net
+ssh <windows-account>@qcworkshop27.tail2122cc.ts.net
+```
+
+Replace `<windows-account>` with the laptop's Windows user name; a Microsoft-account sign-in uses the short local name shown by `whoami` on the laptop, and the password is the account password. Accept the host key on first connection. To stop typing the password, note that `ssh-copy-id` does not work against Windows OpenSSH; instead append your Mac public key to `C:\ProgramData\ssh\administrators_authorized_keys` for administrator accounts or `C:\Users\<account>\.ssh\authorized_keys` for standard accounts, as the Microsoft guide describes.
+
+**Run SecondHands commands remotely.** After connecting, change to the laptop's checkout and use the same commands as the [Snapdragon checkout procedure](#prepare-the-snapdragon-checkout-at-the-hackathon). To view the laptop's dashboard in a Mac browser, forward the two loopback ports when connecting:
+
+```sh
+ssh -L 5173:127.0.0.1:5173 -L 8765:127.0.0.1:8765 <windows-account>@qcworkshop27.tail2122cc.ts.net
+```
+
+Then start `just dev-api` and `just dev-ui` in that session and open `http://localhost:5173` on the Mac. The services bind to loopback on the laptop and allow the `http://localhost:5173` origin, so forwarding keeps the existing security settings; nothing is exposed on the tailnet beyond SSH. The camera is the laptop's; the browser only displays results.
+
+**Other useful routes.** Remote Desktop: enable it in Windows Settings under System, Remote Desktop, then connect with Microsoft Remote Desktop on the Mac to `qcworkshop27.tail2122cc.ts.net`. Files: `scp file <windows-account>@qcworkshop27.tail2122cc.ts.net:C:/Users/<account>/` or Tailscale's Taildrop. VS Code Remote SSH works against Windows OpenSSH hosts and gives an editor on the laptop's checkout. Tailscale Funnel, which publishes a service to the public internet, is not needed and should stay off.
+
+**Record the result.** After the first successful connection, record in [the plan](../plan.md#snapdragon-deployment) which Mac connected, whether password or key authentication was used, whether `ssh` reconnects after the laptop restarts, and the dashboard-forwarding result. No connection has been verified in this repository yet; the procedure above is derived from the vendors' documentation and the reported hostname.
+
 ## Run PC commands through T3
 
 Install T3 and configure the chosen coding-agent provider on the PC. Connect the Mac to that PC environment through T3 Connect or network pairing, following [T3's remote-access instructions](https://github.com/pingdotgg/t3code/blob/main/docs/user/remote-access.md). The documented automatic desktop-managed SSH setup targets Linux and Apple Silicon Mac hosts; use the Windows installation and pairing route for this PC.
@@ -211,7 +272,7 @@ The local application now has Python capture frames and run inference, with Reac
 
 The repository's lockfile was inspected on 2026-10-16. Its PyTorch 2.14.1 and torchvision 0.29.1 entries contain CPython 3.12 packages for macOS ARM64 and Windows x64, but no matching native Windows ARM64 wheels. A wheel is a prebuilt Python package. This is a finding about the current lockfile, not a claim that no alternative distribution exists.
 
-The Mac PyTorch extra is therefore verified only on the Mac. A supported Windows inference runtime or an x64 Python environment under emulation remains an investigation; neither path has been verified for SecondHands. Do not treat the Mac installation as proof of Windows or Qualcomm NPU support. The [Compute Track summary](../hackathon-compute.md#compute-deployment-and-verification) owns the supplied ExecuTorch baseline procedure. [SH-Q-001](../project.md#sh-q-001--model-and-runtime-selection) remains open for model and runtime selection.
+A later index check on 2026-10-17 found native Windows ARM64 PyTorch 2.14.1 CPU wheels on the PyTorch package index, but no Windows ARM64 wheel for ExecuTorch 1.5.1 or OpenCV; see [the package availability table](../design/tech-stack.md#runtime-on-the-snapdragon-laptop). The Mac PyTorch extra is therefore verified only on the Mac. A supported Windows inference runtime or an x64 Python environment under emulation remains an investigation; neither path has been verified for SecondHands. Do not treat the Mac installation as proof of Windows or Qualcomm NPU support. The [Compute Track summary](../hackathon-compute.md#compute-deployment-and-verification) owns the supplied ExecuTorch baseline procedure. [SH-Q-001](../project.md#sh-q-001--model-and-runtime-selection) remains open for model and runtime selection.
 
 ## Check a change
 
