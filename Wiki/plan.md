@@ -12,7 +12,7 @@
 4. For a coding agent: give it the brief's heading, the repository, and the instruction to stop at the brief's acceptance checks. Briefs marked agent-friendly need no camera and no laptop. Review the agent's pull request like any other.
 5. The laptop is shared: follow [the team workflow](runbooks/team-workflow.md#sharing-the-one-snapdragon-laptop). Only Workstreams B, C2, G1, and G3 need it.
 
-Next free identifiers: task SH-T-069, question SH-Q-007, source SH-S-030. Check again before using them.
+Workstream issues #19 to #26 were created on 2026-10-17 evening in the `SecondHands-AI/SecondHands` repository; the previous-idea issues #1 to #9 remain below. Next free identifiers: task SH-T-069, question SH-Q-007, source SH-S-030. Check again before using them.
 
 ## Dependencies and order
 
@@ -40,7 +40,7 @@ C1, D1, D2, and E1 can be built and tested on any computer with a fake backend a
 
 ## Workstream A · Clinical protocols
 
-**Owner: the clinicians; Kate coordinates.** Brief [A](design/implementation-briefs.md#a--protocol-definitions-clinicians).
+**Owner: the clinicians; Kate coordinates.** Brief [A](design/implementation-briefs.md#a--protocol-definitions-clinicians). GitHub: [issue #19](https://github.com/SecondHands-AI/SecondHands/issues/19).
 
 - [ ] **SH-T-057 — Define CS-30 and SLS-01.** Fill the [protocol template](use-cases.md#protocol-template) for the 30-second chair stand and the single-leg stance, including adapted variants and the demo acceptance criteria. Record on the use-cases page, then as JSON under `src/secondhands/protocols/` once SH-T-061 exists.
 - [ ] **SH-T-046 — Define the clinical application.** Kate owns [issue #7](https://github.com/davidmoshal/SecondHands/issues/7); now scoped to the tracker's clinical family and the demo story.
@@ -48,7 +48,7 @@ C1, D1, D2, and E1 can be built and tested on any computer with a fake backend a
 
 ## Workstream B · Laptop and environments
 
-**Owner: Vishwa (steward); camera tests with Cam and Jacqueline ([issue #2](https://github.com/davidmoshal/SecondHands/issues/2)).** Briefs [B6](design/implementation-briefs.md#b6--tier-0-environment-on-the-laptop) and [B7](design/implementation-briefs.md#b7--camera-selection).
+**Owner: Vishwa (steward); camera tests with Cam and Jacqueline ([issue #2](https://github.com/davidmoshal/SecondHands/issues/2)).** Briefs [B6](design/implementation-briefs.md#b6--tier-0-environment-on-the-laptop) and [B7](design/implementation-briefs.md#b7--camera-selection). GitHub: [issue #20](https://github.com/SecondHands-AI/SecondHands/issues/20).
 
 - [ ] **SH-T-036 — Verify Mac-to-laptop access over Tailscale.** A Mac SSH login, reconnection after restart, dashboard port forwarding, per [the runbook](runbooks/mac-and-snapdragon-development.md#access-the-snapdragon-laptop-over-tailscale). [Issue #9](https://github.com/davidmoshal/SecondHands/issues/9).
 - [ ] **SH-T-051 — Stand up Tier 0 on the laptop.** x64 Python 3.12 from the lockfiles, `just smoke-yolo-pose-executorch`, then a 60-second live run; record fps, latency, memory; commit `scripts/laptop-setup.ps1`.
@@ -59,7 +59,7 @@ C1, D1, D2, and E1 can be built and tested on any computer with a fake backend a
 
 ## Workstream C · Perception and the NPU
 
-**Owner: Vishwa, with the Qualcomm engineer.** Briefs [C1](design/implementation-briefs.md#c1--perception-module-and-executorch-xnnpack-backend) (agent-friendly) and [C2](design/implementation-briefs.md#c2--qnn-backend-client-and-the-qualcomm-handoff).
+**Owner: Vishwa, with the Qualcomm engineer.** Briefs [C1](design/implementation-briefs.md#c1--perception-module-and-executorch-xnnpack-backend) (agent-friendly) and [C2](design/implementation-briefs.md#c2--qnn-backend-client-and-the-qualcomm-handoff). GitHub: [issue #21](https://github.com/SecondHands-AI/SecondHands/issues/21).
 
 - [x] **SH-T-050 — Export a pose model to ExecuTorch and validate it.** `just smoke-yolo-pose-executorch`: 11.7 MB XNNPACK `.pte`, matches PyTorch within 3.3e-3 ([observation](experiments-before-saturday.md#yolo-pose-executorch-export-observation)).
 - [ ] **SH-T-060 — Build the perception module.** `perception/base.py` interface and `Keypoints` type, the ExecuTorch XNNPACK backend with YOLO pose decoding, the MediaPipe fallback stub, `just recognize-pose`, tests against a saved reference.
@@ -68,28 +68,28 @@ C1, D1, D2, and E1 can be built and tested on any computer with a fake backend a
 
 ## Workstream D · Analysis engine
 
-**Owner: engineers; thresholds from Workstream A.** Briefs [D1](design/implementation-briefs.md#d1--analysis-angles-rep-counter-scorers) and [D2](design/implementation-briefs.md#d2--protocol-schema-and-loader), both agent-friendly.
+**Owner: engineers; thresholds from Workstream A.** Briefs [D1](design/implementation-briefs.md#d1--analysis-angles-rep-counter-scorers) and [D2](design/implementation-briefs.md#d2--protocol-schema-and-loader), both agent-friendly. GitHub: [issue #22](https://github.com/SecondHands-AI/SecondHands/issues/22).
 
 - [ ] **SH-T-052 — Angles, rep counters, and scorers.** `analysis/angles.py`, `reps.py` (sit-to-stand and squat hysteresis state machines emitting contract `rep_event`s), `scorers.py` (CS-30, SLS-01), `session.py`; synthetic-trace tests; `just replay-keypoints`.
 - [ ] **SH-T-061 — Protocol schema, loader, and the two JSON files.** Validation with clear errors, overrides for Clinic-view threshold edits, `just validate-protocols`; files marked draft until Workstream A supplies values.
 
 ## Workstream E · Service and storage
 
-**Owner: first of Vishwa or David to claim it.** Brief [E1](design/implementation-briefs.md#e1--tracker-session-in-the-service-sessions-api-storage), agent-friendly given C1 and D1.
+**Owner: first of Vishwa or David to claim it.** Brief [E1](design/implementation-briefs.md#e1--tracker-session-in-the-service-sessions-api-storage), agent-friendly given C1 and D1. GitHub: [issue #23](https://github.com/SecondHands-AI/SecondHands/issues/23).
 
 - [ ] **SH-T-063 — Tracker session in the API.** Control messages, the three streamed messages, one camera owner, invalidation on protocol change, fake-backend tests.
 - [ ] **SH-T-062 — SQLite storage and sessions endpoints.** Participants by role label, baselines, sessions, rep events; `GET /api/sessions`, detail, export.
 
 ## Workstream F · Frontend
 
-**Owner: David.** Brief [F1](design/implementation-briefs.md#f1--home-and-clinic-views).
+**Owner: David.** Brief [F1](design/implementation-briefs.md#f1--home-and-clinic-views). GitHub: [issue #24](https://github.com/SecondHands-AI/SecondHands/issues/24).
 
 - [ ] **SH-T-054 — Home and Clinic views.** Per the [Companion prototype](https://secondhands-ai.github.io/SecondHands/companion.html): Home with one instruction at a time and no numbers, Clinic with overlays, measurements, flags, threshold editor, baseline comparison, notes; mode switch; runtime badge; preferences; transport and mapping tests.
 - [ ] **SH-T-013 — Demonstration interface polish.** Measured capture-to-display latency shown in the Clinic view; replaces the earlier assistive scope of this task.
 
 ## Workstream G · Data, validation, and benchmarks
 
-**Owner: engineers; two consenting team members for recordings.** Briefs [G1](design/implementation-briefs.md#g1--recording-and-labelling-tools), [G2](design/implementation-briefs.md#g2--window-classifier), [G3](design/implementation-briefs.md#g3--benchmarks-and-evidence).
+**Owner: engineers; two consenting team members for recordings.** Briefs [G1](design/implementation-briefs.md#g1--recording-and-labelling-tools), [G2](design/implementation-briefs.md#g2--window-classifier), [G3](design/implementation-briefs.md#g3--benchmarks-and-evidence). GitHub: [issue #25](https://github.com/SecondHands-AI/SecondHands/issues/25).
 
 - [ ] **SH-T-064 — Recording and labelling tools, and the recordings.** `just record-keypoints`, `just label-reps`; chair stands and single-leg stance from two people; about 100 calibration frames; all under ignored `data/`.
 - [ ] **SH-T-053 — Train and export the window classifier.** Held-out accuracy and agreement with the rule counter; XNNPACK export; Qualcomm export attempt; adapter emitting `source: "classifier"`.
@@ -98,7 +98,7 @@ C1, D1, D2, and E1 can be built and tested on any computer with a fake backend a
 
 ## Workstream H · Demonstration and presentation
 
-**Owner: Kate (proposed) with everyone's evidence.** Brief [H](design/implementation-briefs.md#h--demonstration-script-and-presentation).
+**Owner: Kate (proposed) with everyone's evidence.** GitHub: [issue #5](https://github.com/SecondHands-AI/SecondHands/issues/5). Brief [H](design/implementation-briefs.md#h--demonstration-script-and-presentation).
 
 - [ ] **SH-T-002 — Agree the demonstration and acceptance criteria.** Participant, the two protocols, screens, success and failure behaviour, from Workstream A's criteria.
 - [ ] **SH-T-015 — Demo script, presentation, and evidence.** `Wiki/hackathon/demo-script.md` against [the judging weights](hackathon/judging-criteria.md#scoring); only claims that have run. [Issue #5](https://github.com/davidmoshal/SecondHands/issues/5).
@@ -106,7 +106,7 @@ C1, D1, D2, and E1 can be built and tested on any computer with a fake backend a
 
 ## Workstream I · Documentation and Pages
 
-**Owner: Vishwa; anyone may contribute.** Brief [I](design/implementation-briefs.md#i--documentation-sync).
+**Owner: Vishwa; anyone may contribute.** Brief [I](design/implementation-briefs.md#i--documentation-sync). GitHub: [issue #26](https://github.com/SecondHands-AI/SecondHands/issues/26).
 
 - [ ] **SH-T-048 — Update the Wiki, README, proposal, and issues to the tracker direction.** Keep the assistive story as an extension; update [issues #1 to #7](https://github.com/davidmoshal/SecondHands/issues) descriptions.
 - [ ] **SH-T-055 — Link the teammates' documents.** PRD, TDD, frontend document, from [the document map](design/tech-stack.md#document-map-for-the-team) and the index.

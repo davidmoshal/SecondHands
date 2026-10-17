@@ -51,6 +51,8 @@ The repository was transferred to the `SecondHands-AI` GitHub organization on 20
 
 ## How we collaborate in Git
 
+The repository address is `https://github.com/SecondHands-AI/SecondHands` since the transfer on 2026-10-17; existing clones of the old address keep working through GitHub's redirect, but new clones and documentation should use the new one.
+
 1. Work on your own machine on a branch named `<initials>/<topic>`, for example `dm/session-screen` or `vp/qnn-backend`. Keep branches small and short-lived.
 2. Run the relevant `just test-*` recipe and `uv run --locked ruff check src` before opening a pull request. The UI runs `bun run --cwd ui test` and `bun run --cwd ui build`.
 3. Open a pull request against `main`, link the plan task identifier, and ask one teammate to review. Merge early and often; a day-old branch on this project is already stale.

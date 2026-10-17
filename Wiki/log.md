@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Workstream issues linked
+
+Created GitHub issues #19 to #26 for workstreams A to G and I in the transferred `SecondHands-AI/SecondHands` repository and linked them from [the plan](plan.md); recorded the new repository address in [the team workflow](runbooks/team-workflow.md#how-we-collaborate-in-git).
+
 ## 2026-10-17 — Repository transfer and Pages address
 
 The repository now lives under the `SecondHands-AI` organization. Updated every GitHub Pages link from `davidmoshal.github.io` to `secondhands-ai.github.io` and noted in [the team workflow](runbooks/team-workflow.md#prototypes-and-reference-pages-on-github-pages) that Pages must be re-enabled in the transferred repository.
