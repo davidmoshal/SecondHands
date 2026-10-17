@@ -2,7 +2,7 @@
 
 **Updated 2026-10-17, evening.** This is the single task tracker. The project is the on-device movement assessment tracker confirmed by the user on 2026-10-17; the assistive-control work that came first is kept at the end as the previous idea and as a reusable extension. Checked tasks have evidence; unchecked tasks are open work or marked proposals. Every engineering task below has a self-contained specification in [the implementation briefs](design/implementation-briefs.md) so a teammate or a coding agent can pick it up from a fresh checkout.
 
-**Current position.** Verified: YOLO11n-pose exports to ExecuTorch 1.5.1 and matches PyTorch on the CPU; the React/Bun dashboard, the MediaPipe recognition, and the trigger engine run on the Mac; a local depth bridge captured Femto Bolt depth on the laptop; the laptop is on Tailscale. Not yet verified: any SecondHands code on the laptop, a camera choice, a protocol from the clinicians, the analysis engine, the tracker service and views, the NPU. Public prototypes and reference pages: [davidmoshal.github.io/SecondHands](https://davidmoshal.github.io/SecondHands/).
+**Current position.** Verified: YOLO11n-pose exports to ExecuTorch 1.5.1 and matches PyTorch on the CPU; the React/Bun dashboard, the MediaPipe recognition, and the trigger engine run on the Mac; a local depth bridge captured Femto Bolt depth on the laptop; the laptop is on Tailscale. Not yet verified: any SecondHands code on the laptop, a camera choice, a protocol from the clinicians, the analysis engine, the tracker service and views, the NPU. Public prototypes and reference pages: [secondhands-ai.github.io/SecondHands](https://secondhands-ai.github.io/SecondHands/).
 
 ## How to pick up work
 
@@ -84,7 +84,7 @@ C1, D1, D2, and E1 can be built and tested on any computer with a fake backend a
 
 **Owner: David.** Brief [F1](design/implementation-briefs.md#f1--home-and-clinic-views).
 
-- [ ] **SH-T-054 — Home and Clinic views.** Per the [Companion prototype](https://davidmoshal.github.io/SecondHands/companion.html): Home with one instruction at a time and no numbers, Clinic with overlays, measurements, flags, threshold editor, baseline comparison, notes; mode switch; runtime badge; preferences; transport and mapping tests.
+- [ ] **SH-T-054 — Home and Clinic views.** Per the [Companion prototype](https://secondhands-ai.github.io/SecondHands/companion.html): Home with one instruction at a time and no numbers, Clinic with overlays, measurements, flags, threshold editor, baseline comparison, notes; mode switch; runtime badge; preferences; transport and mapping tests.
 - [ ] **SH-T-013 — Demonstration interface polish.** Measured capture-to-display latency shown in the Clinic view; replaces the earlier assistive scope of this task.
 
 ## Workstream G · Data, validation, and benchmarks

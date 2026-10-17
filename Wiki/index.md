@@ -9,7 +9,7 @@ This Wiki holds maintained project knowledge. **Current direction (2026-10-17):*
 ## Plan and experiments
 
 - [System design](design/index.md) — the implemented exploration dashboard and trigger policy, remaining proposals, and PyTorch/ExecuTorch runtime boundaries.
-- [Prototypes on GitHub Pages](https://davidmoshal.github.io/SecondHands/) — the Companion (Home and Clinic views), the clinic console, the architecture walkthrough, the project brief, and the team workflow, served from the repository's `docs/` folder once Pages is enabled with the GitHub Actions source.
+- [Prototypes on GitHub Pages](https://secondhands-ai.github.io/SecondHands/) — the Companion (Home and Clinic views), the clinic console, the architecture walkthrough, the project brief, and the team workflow, served from the repository's `docs/` folder once Pages is enabled with the GitHub Actions source.
 - [Use cases and team ownership](use-cases.md) — the clinician-owned test-protocol principle, the use-case catalog from clinical assessment to field sobriety support and private skin screening, the protocol template, proposed ownership, reach to phones, and the privacy rules.
 - [Movement tracker tech stack](design/tech-stack.md) — the proposed camera-based fitness tracker stack for the Snapdragon laptop: sensing, pose estimation, ExecuTorch runtime tiers, interface contract, team document map, and two-day plan.
 - [Field sobriety example](requirements/field-sobriety.md) — an example of watching walk-and-turn and one-leg-stand movements with the same pose pipeline. It does not replace the fitness tracker and it does not determine impairment.

@@ -12,7 +12,7 @@ The three WebSocket messages are fixed by [the tech stack](tech-stack.md#service
 
 **Goal.** Two protocol definitions, CS-30 (30-second chair stand) and SLS-01 (single-leg stance), in the [template](../use-cases.md#protocol-template), with thresholds the clinicians stand behind for the demonstration.
 
-**Read.** [Use cases](../use-cases.md), [skeletal medical tests](../requirements/skeletal-medical-tests.md), the Home-view wording in the [Companion prototype](https://davidmoshal.github.io/SecondHands/companion.html).
+**Read.** [Use cases](../use-cases.md), [skeletal medical tests](../requirements/skeletal-medical-tests.md), the Home-view wording in the [Companion prototype](https://secondhands-ai.github.io/SecondHands/companion.html).
 
 **Deliver.** The filled template on the use-cases page, then the same values in `src/secondhands/protocols/cs-30.json` and `sls-01.json` once brief D2 exists (an engineer transcribes; the clinician checks the diff). Include the adapted variants (hands allowed, fewer reps, chair with arms) and the acceptance criteria for the demo: count agreement with a clinician count, time agreement with a stopwatch.
 
@@ -93,7 +93,7 @@ The three WebSocket messages are fixed by [the tech stack](tech-stack.md#service
 
 ## F1 · Home and Clinic views
 
-**Goal.** The React/Bun app gains the two views of the [Companion prototype](https://davidmoshal.github.io/SecondHands/companion.html), driven only by the WebSocket messages.
+**Goal.** The React/Bun app gains the two views of the [Companion prototype](https://secondhands-ai.github.io/SecondHands/companion.html), driven only by the WebSocket messages.
 
 **Files.** `ui/src/tracker/` with `useTrackerSession.ts` (transport for the three messages and the control messages), `HomeView.tsx`, `ClinicView.tsx`, `Overlay.tsx` (canvas skeleton, angles, box, hip trace, each toggleable), `ProtocolEditor.tsx` (threshold overrides sent as `select_protocol`), `Progress.tsx` (sessions from `/api/sessions`, bar chart against the baseline), a mode switch in the top bar, a runtime badge, and a preferences panel (bigger text, read-aloud through the Web Speech API, more contrast) that persists per browser.
 

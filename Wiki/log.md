@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Repository transfer and Pages address
+
+The repository now lives under the `SecondHands-AI` organization. Updated every GitHub Pages link from `davidmoshal.github.io` to `secondhands-ai.github.io` and noted in [the team workflow](runbooks/team-workflow.md#prototypes-and-reference-pages-on-github-pages) that Pages must be re-enabled in the transferred repository.
+
 ## 2026-10-17 — Live camera page added to GitHub Pages
 
 Added `docs/live.html`: camera selection, MediaPipe Pose Landmarker (lite) in the browser, skeleton and angle overlay, and the knee-angle hysteresis counter for chair stands and squats in Home and Clinic views, with editable thresholds and a visible runtime badge stating that this is the browser model, not ExecuTorch. Verified in headless Chromium with a fake camera: model load, camera open, set start, no page errors. Linked from the site index, [use cases](use-cases.md), and [the tech stack](design/tech-stack.md#frontend).
