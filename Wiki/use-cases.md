@@ -10,6 +10,8 @@ The product is a test engine, not a fitness app. The engine turns camera frames 
 
 ## Use-case catalog
 
+Detailed requirement pages added in parallel own the specifics behind several rows: [candidate skeletal medical tests](requirements/skeletal-medical-tests.md) for the clinical family, [the field sobriety example](requirements/field-sobriety.md), and [the on-device advantages](requirements/on-device.md). This table routes to them; it does not restate their content.
+
 | Family | What is measured | Hackathon status | Owner of requirements | Conditions |
 | --- | --- | --- | --- | --- |
 | Clinical movement assessment | Standardized functional tests scored from the camera: 30-second chair stand, single-leg stance time and sway, timed up and go, joint range of motion | Demonstration target | Clinicians | Validate against stopwatch, goniometer, and clinician rating on the same session |
