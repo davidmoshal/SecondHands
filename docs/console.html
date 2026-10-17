@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SecondHands Clinic Console</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Layout: app shell with a left rail, top status bar, and one screen at a time; the session screen is camera-left, numbers-right. */
+  :root {
+    --bg: #eef1ee;
+    --panel: #ffffff;
+    --panel-2: #f6f8f6;
+    --fg: #15201b;
+    --muted: #5e6c65;
+    --line: #d3dbd5;
+    --accent: #0f6e63;
+    --accent-soft: #d6ebe6;
+    --accent-ink: #ffffff;
+    --warn: #a35a00;
+    --warn-soft: #f7e9d3;
+    --bad: #a3272b;
+    --bad-soft: #f6dcdc;
+    --cam: #1a211e;
+    --cam-2: #0f1412;
+    --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1412; --panel: #171d1a; --panel-2: #1d2420; --fg: #e4eae6; --muted: #9bada4; --line: #2b3530;
+      --accent: #5fc4b4; --accent-soft: #1a3a35; --accent-ink: #0f1412; --warn: #e3a44a; --warn-soft: #3a2c15;
+      --bad: #ef8a8d; --bad-soft: #3d1f20; --cam: #0b0f0d; --cam-2: #05080700; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1412; --panel: #171d1a; --panel-2: #1d2420; --fg: #e4eae6; --muted: #9bada4; --line: #2b3530;
+    --accent: #5fc4b4; --accent-soft: #1a3a35; --accent-ink: #0f1412; --warn: #e3a44a; --warn-soft: #3a2c15;
+    --bad: #ef8a8d; --bad-soft: #3d1f20; --cam: #0b0f0d; --cam-2: #05080700; color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+         padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px; box-sizing: border-box; }
+  * { box-sizing: border-box; }
+  .app { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 200px 1fr; grid-template-rows: auto 1fr; gap: 14px; min-height: calc(100% - 0px); }
+  .top { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .brand { font-weight: 600; letter-spacing: 0.01em; display: flex; align-items: center; gap: 8px; }
+  .brand i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .top .spacer { flex: 1; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.74rem; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); }
+  .pill.plain { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+  .pill b { font-weight: 600; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  nav { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px; display: grid; gap: 4px; align-content: start; }
+  nav button { all: unset; cursor: pointer; padding: 9px 12px; border-radius: 7px; font-weight: 500; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+  nav button:hover { background: var(--panel-2); color: var(--fg); }
+  nav button[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+  nav button:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  nav .sub { font-size: 0.72rem; font-family: var(--font-mono); color: var(--muted); }
+  nav .participant { margin-top: 10px; padding: 10px 12px; border-top: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); display: grid; gap: 4px; }
+  nav .participant b { color: var(--fg); font-weight: 500; }
+  main { min-width: 0; display: grid; gap: 14px; align-content: start; }
+  .screen[hidden] { display: none; }
+  .screen { display: grid; gap: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+  .panel h2 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 600; }
+  .label { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .session { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 14px; }
+  .cam { position: relative; background: radial-gradient(ellipse at 50% 30%, var(--cam) 0%, var(--cam-2) 100%), var(--cam); border-radius: 10px; overflow: hidden; aspect-ratio: 4 / 3; max-width: 100%; }
+  .cam canvas { width: 100%; height: 100%; display: block; }
+  .cam .hud { position: absolute; left: 12px; top: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .cam .hud .pill { background: rgba(0,0,0,0.45); color: #e4eae6; backdrop-filter: blur(4px); }
+  .cam .hud .pill.live { color: #7fe0cf; }
+  .cam .angles { position: absolute; left: 12px; bottom: 12px; display: grid; gap: 4px; font-family: var(--font-mono); font-size: 0.74rem; color: #cfe3dc; background: rgba(0,0,0,0.45); padding: 8px 10px; border-radius: 8px; }
+  .cam .instruction { position: absolute; right: 12px; bottom: 12px; max-width: 46%; background: rgba(0,0,0,0.55); color: #f0f4f2; padding: 8px 12px; border-radius: 8px; font-size: 0.9rem; }
+  .metrics { display: grid; gap: 12px; align-content: start; }
+  .rep { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+  .rep .num { font-family: var(--font-mono); font-size: 4.6rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .rep .of { color: var(--muted); font-size: 0.9rem; }
+  .ring { width: 86px; height: 86px; }
+  .phase { display: flex; gap: 6px; flex-wrap: wrap; }
+  .phase span { font-family: var(--font-mono); font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); }
+  .phase span.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .cue { border-left: 3px solid var(--warn); background: var(--warn-soft); padding: 10px 12px; border-radius: 0 8px 8px 0; min-height: 56px; display: grid; gap: 2px; }
+  .cue.good { border-color: var(--accent); background: var(--accent-soft); }
+  .cue b { font-weight: 600; }
+  .cue small { color: var(--muted); }
+  .kv { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .kv div { background: var(--panel-2); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+  .kv .v { font-family: var(--font-mono); font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .reps-strip { display: flex; gap: 4px; align-items: flex-end; height: 44px; }
+  .reps-strip i { flex: 1; background: var(--accent); border-radius: 3px 3px 0 0; min-width: 6px; opacity: 0.9; }
+  .reps-strip i.low { background: var(--warn); }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { all: unset; cursor: pointer; padding: 9px 14px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; border: 1px solid var(--line); background: var(--panel); color: var(--fg); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn.danger { color: var(--bad); border-color: var(--bad); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .tile .v { font-family: var(--font-mono); font-size: 1.7rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tile .d { color: var(--muted); font-size: 0.85rem; }
+  .tile .delta { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); }
+  canvas.chart { width: 100%; height: 220px; display: block; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
+  .list { display: grid; gap: 8px; }
+  .event { display: flex; justify-content: space-between; gap: 10px; padding: 8px 10px; background: var(--panel-2); border-radius: 8px; font-size: 0.88rem; }
+  .event time { font-family: var(--font-mono); color: var(--muted); }
+  .proto { display: grid; gap: 10px; }
+  .proto header { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .proto h3 { margin: 0; font-size: 1rem; }
+  .field { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; font-size: 0.9rem; }
+  .field label { color: var(--muted); }
+  .field input, .field select { font: inherit; font-family: var(--font-mono); font-size: 0.85rem; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2); color: var(--fg); width: 110px; text-align: right; }
+  .field select { width: auto; text-align: left; }
+  .tests { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); gap: 14px; }
+  .test-big { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+  .test-big .num { font-family: var(--font-mono); font-size: 3.6rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .band { font-size: 0.85rem; color: var(--muted); }
+  .result { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; background: var(--panel-2); }
+  .result .verdict { font-weight: 600; }
+  .result .verdict.pass { color: var(--accent); }
+  .result .verdict.fail { color: var(--bad); }
+  .spark { height: 48px; width: 100%; display: block; }
+  .sim-note { font-size: 0.8rem; color: var(--muted); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    nav { display: flex; flex-wrap: wrap; gap: 4px; }
+    nav .participant { display: none; }
+    .session, .tests { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { .btn, nav button { transition: none; } }
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+
+<div class="app">
+  <div class="top">
+    <div class="brand"><i></i> SecondHands · Clinic Console</div>
+    <span class="pill plain">Dell Snapdragon X Elite · Windows 11 ARM64</span>
+    <span class="spacer"></span>
+    <span class="pill" id="runtime-pill"><span class="dot"></span> <b>ExecuTorch</b> xnnpack · yolo11n-pose · <span id="fps">24</span> fps</span>
+    <span class="pill plain" id="clock">00:00</span>
+  </div>
+
+  <nav aria-label="Screens">
+    <button data-screen="session" aria-current="page">Session <span class="sub">live</span></button>
+    <button data-screen="tests">Clinical tests <span class="sub">3</span></button>
+    <button data-screen="progress">Progress</button>
+    <button data-screen="protocols">Protocols <span class="sub">draft</span></button>
+    <button data-screen="device">Device</button>
+    <div class="participant">
+      <span class="label">Participant</span>
+      <b>Role label: P-A</b>
+      <span>Baseline 17 Oct · adapted squat set</span>
+      <span class="sim-note">Prototype: camera and keypoints are simulated; the rep counter and test scoring run the real rules.</span>
+    </div>
+  </nav>
+
+  <main>
+    <!-- SESSION -->
+    <section class="screen" id="screen-session">
+      <div class="session">
+        <div class="panel" style="padding:10px">
+          <div class="cam">
+            <canvas id="cam" width="800" height="600" aria-label="Simulated camera view with the detected skeleton drawn over the person"></canvas>
+            <div class="hud">
+              <span class="pill live"><span class="dot"></span> LIVE · simulated feed</span>
+              <span class="pill">pose 36 ms</span>
+              <span class="pill" id="conf-pill">17/17 joints · conf 0.94</span>
+            </div>
+            <div class="angles" id="angles" aria-live="off"></div>
+            <div class="instruction" id="instruction">Squat down until your thighs are level with the floor, then stand up fully.</div>
+          </div>
+        </div>
+        <div class="panel metrics">
+          <div>
+            <div class="label">Adapted squat · set 2 of 3</div>
+            <div class="rep">
+              <div><div class="num" id="rep-count">0</div><div class="of">of <span id="rep-target">12</span> reps</div></div>
+              <svg class="ring" viewBox="0 0 100 100" role="img" aria-label="Set progress ring">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="var(--line)" stroke-width="10"/>
+                <circle id="ring" cx="50" cy="50" r="42" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" transform="rotate(-90 50 50)"/>
+                <text x="50" y="55" text-anchor="middle" font-size="16" font-weight="600" fill="currentColor" font-family="IBM Plex Mono, monospace" id="ring-pct">0%</text>
+              </svg>
+            </div>
+          </div>
+          <div class="phase" id="phase" aria-label="Rep phase">
+            <span data-p="standing">standing</span><span data-p="down">down</span><span data-p="bottom">bottom</span><span data-p="up">up</span>
+          </div>
+          <div class="cue" id="cue"><b>Ready</b><small>Stand in the frame with your whole body visible.</small></div>
+          <div class="kv">
+            <div><div class="label">Last rep</div><div class="v" id="last-dur">—</div></div>
+            <div><div class="label">Depth</div><div class="v" id="last-depth">—</div></div>
+            <div><div class="label">Tempo</div><div class="v" id="tempo">—</div></div>
+          </div>
+          <div>
+            <div class="label">Depth per rep · amber below protocol threshold</div>
+            <div class="reps-strip" id="reps-strip" aria-label="Depth score per rep"></div>
+          </div>
+          <div class="controls">
+            <button class="btn primary" id="btn-start">Start set</button>
+            <button class="btn" id="btn-pause" disabled>Pause</button>
+            <button class="btn danger" id="btn-stop" disabled>Stop and save</button>
+          </div>
+          <div class="sim-note">Counter source: rules (knee angle hysteresis). Classifier: <span id="clf">standby</span>.</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="panel">
+          <h2>Rep log</h2>
+          <div style="overflow-x:auto"><table aria-label="Repetitions in this set">
+            <thead><tr><th class="num">#</th><th class="num">Duration</th><th class="num">Min knee</th><th class="num">Depth</th><th>Cue</th><th>Source</th></tr></thead>
+            <tbody id="rep-rows"><tr><td colspan="6" style="color:var(--muted)">No reps yet. Press Start set.</td></tr></tbody>
+          </table></div>
+        </div>
+        <div class="panel">
+          <h2>Session summary</h2>
+          <div class="grid3">
+            <div class="tile"><div class="label">Reps saved</div><div class="v" id="sum-reps">0</div><div class="d">this session</div></div>
+            <div class="tile"><div class="label">Median rep</div><div class="v" id="sum-med">—</div><div class="d">seconds</div></div>
+            <div class="tile"><div class="label">Form score</div><div class="v" id="sum-form">—</div><div class="d">mean depth, 0 to 1</div></div>
+          </div>
+          <p class="sim-note" style="margin:10px 0 0">Saved summaries go to the local SQLite store as <code>session_summary</code>. No frames are stored.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLINICAL TESTS -->
+    <section class="screen" id="screen-tests" hidden>
+      <div class="tests">
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+            <div><div class="label">Protocol SLS-01 · draft</div><h2 style="margin:4px 0 0">Single-leg stance · right leg</h2></div>
+            <span class="pill warn">thresholds await clinician</span>
+          </div>
+          <div class="test-big" style="margin-top:12px">
+            <div><div class="num" id="sls-time">0.0</div><div class="band">seconds · pass at ≥ <span id="sls-target">20</span> s · stops at 30 s</div></div>
+            <div>
+              <div class="label">Hip-centre sway · cm from start</div>
+              <canvas class="chart" id="sway" height="220" aria-label="Live sway trace with the tolerance band"></canvas>
+            </div>
+          </div>
+          <div class="controls" style="margin-top:12px">
+            <button class="btn primary" id="sls-start">Start test</button>
+            <button class="btn danger" id="sls-stop" disabled>End (foot down)</button>
+            <select id="sls-leg" aria-label="Leg" style="font:inherit;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--fg)"><option>Right leg</option><option>Left leg</option></select>
+          </div>
+        </div>
+        <div class="panel metrics">
+          <div><div class="label">Events</div><div class="list" id="sls-events"><div class="event"><span>None yet</span></div></div></div>
+          <div><div class="label">Result</div><div class="result" id="sls-result"><span class="verdict">Not run</span><span class="band">Events and verdict follow the protocol's thresholds.</span></div></div>
+          <div>
+            <div class="label">Other tests</div>
+            <div class="list">
+              <div class="event"><span>30-second chair stand · CS-30</span><span class="pill plain">draft</span></div>
+              <div class="event"><span>Timed up and go · TUG-01</span><span class="pill plain">draft</span></div>
+              <div class="event"><span>Shoulder range of motion · ROM-S</span><span class="pill plain">not started</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="screen" id="screen-progress" hidden>
+      <div class="grid3">
+        <div class="panel tile"><div class="label">Chair stands in 30 s</div><div class="v">13</div><div class="d">latest · baseline 8</div><div class="delta">+5 since 17 Oct</div></div>
+        <div class="panel tile"><div class="label">Single-leg stance</div><div class="v">18.4 s</div><div class="d">latest · baseline 9.1 s</div><div class="delta">+9.3 s</div></div>
+        <div class="panel tile"><div class="label">Squat depth score</div><div class="v">0.81</div><div class="d">latest set mean · baseline 0.62</div><div class="delta">+0.19</div></div>
+      </div>
+      <div class="grid2">
+        <div class="panel">
+          <h2>Chair stands per session</h2>
+          <canvas class="chart" id="progress" height="220" aria-label="Bar chart of chair stand repetitions across sessions with the baseline line"></canvas>
+          <div class="sim-note" id="progress-tip">Hover a bar for the session details.</div>
+        </div>
+        <div class="panel">
+          <h2>Sessions</h2>
+          <div style="overflow-x:auto"><table>
+            <thead><tr><th>Date</th><th>Protocol</th><th class="num">Result</th><th class="num">Form</th><th>Reviewed</th></tr></thead>
+            <tbody>
+              <tr><td>14 Nov</td><td>CS-30</td><td class="num">13</td><td class="num">0.81</td><td><span class="pill plain">pending</span></td></tr>
+              <tr><td>7 Nov</td><td>CS-30</td><td class="num">12</td><td class="num">0.78</td><td><span class="pill">clinician</span></td></tr>
+              <tr><td>31 Oct</td><td>CS-30</td><td class="num">11</td><td class="num">0.74</td><td><span class="pill">clinician</span></td></tr>
+              <tr><td>24 Oct</td><td>CS-30</td><td class="num">9</td><td class="num">0.66</td><td><span class="pill">clinician</span></td></tr>
+              <tr><td>17 Oct</td><td>CS-30 · baseline</td><td class="num">8</td><td class="num">0.62</td><td><span class="pill">clinician</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="controls" style="margin-top:10px"><button class="btn" id="btn-export">Export report (JSON)</button><button class="btn" id="btn-replay">Replay skeleton</button></div>
+          <div class="sim-note" id="export-note" style="margin-top:6px">Example history for the prototype.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROTOCOLS -->
+    <section class="screen" id="screen-protocols" hidden>
+      <div class="grid2">
+        <div class="panel proto">
+          <header><h3>SQ-A · Adapted squat set</h3><span class="pill warn">draft · clinician to confirm</span></header>
+          <div class="field"><label for="p-depth">Depth threshold · min knee angle counts as full depth (°)</label><input id="p-depth" type="number" value="100" min="60" max="140"></div>
+          <div class="field"><label for="p-top">Top threshold · knee angle to count as standing (°)</label><input id="p-top" type="number" value="160" min="140" max="179"></div>
+          <div class="field"><label for="p-reps">Reps per set</label><input id="p-reps" type="number" value="12" min="1" max="30"></div>
+          <div class="field"><label for="p-tempo">Slowest acceptable rep (s)</label><input id="p-tempo" type="number" value="4.0" step="0.5" min="1"></div>
+          <div class="field"><label for="p-cue">Cue when depth is short</label><select id="p-cue"><option>Go a little deeper</option><option>Sit back into the chair</option><option>Hold the rail and lower slowly</option></select></div>
+          <p class="sim-note">Changes apply to the live session immediately. Saved protocols are JSON files the engine loads at start.</p>
+        </div>
+        <div class="panel proto">
+          <header><h3>SLS-01 · Single-leg stance</h3><span class="pill warn">draft · clinician to confirm</span></header>
+          <div class="field"><label for="s-pass">Pass time (s)</label><input id="s-pass" type="number" value="20" min="1" max="60"></div>
+          <div class="field"><label for="s-band">Sway tolerance (± cm)</label><input id="s-band" type="number" value="2" step="0.5" min="0.5"></div>
+          <div class="field"><label for="s-arm">Arm abduction counts as an event above (°)</label><input id="s-arm" type="number" value="30" min="5" max="90"></div>
+          <div class="field"><label for="s-max">Stop automatically at (s)</label><input id="s-max" type="number" value="30" min="5" max="120"></div>
+          <div class="field"><label>Reference instrument</label><span style="font-family:var(--font-mono);font-size:.85rem">stopwatch + observer</span></div>
+        </div>
+        <div class="panel proto">
+          <header><h3>CS-30 · 30-second chair stand</h3><span class="pill plain">draft</span></header>
+          <div class="field"><label>Metric</label><span style="font-family:var(--font-mono);font-size:.85rem">stand count, hip-knee cycle</span></div>
+          <div class="field"><label>Agreement target vs clinician count</label><span class="pill warn">to set</span></div>
+          <div class="field"><label>Reference</label><span style="font-family:var(--font-mono);font-size:.85rem">clinician count, stopwatch</span></div>
+        </div>
+        <div class="panel proto">
+          <header><h3>Protocol file shape</h3><span class="pill plain">engine contract</span></header>
+<pre style="margin:0;font-family:var(--font-mono);font-size:.78rem;line-height:1.45;overflow-x:auto;background:var(--panel-2);padding:10px;border-radius:8px">{
+  "id": "SLS-01", "name": "Single-leg stance",
+  "instructions": "Stand on one leg, hands on hips, as long as you can.",
+  "phases": [{"name":"holding","start":"foot_lift","end":"foot_down|t>=max_s"}],
+  "metrics": ["hold_s","sway_cm","arm_abduction_events"],
+  "thresholds": {"pass_s":20,"sway_band_cm":2,"arm_deg":30,"max_s":30},
+  "report": ["hold_s","sway_trace","events","baseline_delta"],
+  "reference": "stopwatch+observer", "agreement": {"hold_s":0.5}
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEVICE -->
+    <section class="screen" id="screen-device" hidden>
+      <div class="grid3">
+        <div class="panel tile"><div class="label">Runtime</div><div class="v" style="font-size:1.2rem">ExecuTorch 1.5.1</div><div class="d">backend xnnpack · tier 0 · x64 Python under emulation</div></div>
+        <div class="panel tile"><div class="label">Pose model</div><div class="v" style="font-size:1.2rem">yolo11n-pose</div><div class="d">11.7 MB .pte · FP32 · 640 px · matches PyTorch within 3.3e-3</div></div>
+        <div class="panel tile"><div class="label">NPU</div><div class="v" style="font-size:1.2rem">not delegated</div><div class="d">RTMPose QNN export in progress with Qualcomm · HTP v73</div></div>
+      </div>
+      <div class="grid2">
+        <div class="panel">
+          <h2>Pose latency · last 60 s</h2>
+          <canvas class="chart" id="latency" height="160" aria-label="Line chart of per-frame pose latency over the last minute"></canvas>
+          <div class="sim-note">Target for the CPU tier: 15 frames per second at 640 px. Values simulated for the prototype.</div>
+        </div>
+        <div class="panel">
+          <h2>Capture and privacy</h2>
+          <div class="list">
+            <div class="event"><span>Camera</span><span style="font-family:var(--font-mono)">RealSense D435 color (UVC) · 1280×720 · 30 fps</span></div>
+            <div class="event"><span>Frames stored</span><span style="font-family:var(--font-mono)">0 · in-memory only</span></div>
+            <div class="event"><span>Keypoints stored</span><span style="font-family:var(--font-mono)">only during an explicit recording</span></div>
+            <div class="event"><span>Network</span><span style="font-family:var(--font-mono)">loopback 127.0.0.1:8765 · no cloud</span></div>
+            <div class="event"><span>Remote access</span><span style="font-family:var(--font-mono)">Tailscale · SSH only</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  // ---------- navigation ----------
+  const screens = ['session', 'tests', 'progress', 'protocols', 'device'];
+  function show(name) {
+    screens.forEach((s) => { $('screen-' + s).hidden = s !== name; });
+    document.querySelectorAll('nav button[data-screen]').forEach((b) => {
+      if (b.dataset.screen === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    try { localStorage.setItem('sh-screen', name); } catch (e) {}
+    if (name === 'progress') drawProgress(null);
+    if (name === 'device') drawLatency();
+  }
+  document.querySelectorAll('nav button[data-screen]').forEach((b) => b.addEventListener('click', () => show(b.dataset.screen)));
+  let initial = 'session';
+  try { const saved = localStorage.getItem('sh-screen'); if (screens.includes(saved)) initial = saved; } catch (e) {}
+  const hash = location.hash.replace('#', ''); if (screens.includes(hash)) initial = hash;
+  show(initial);
+
+  // ---------- clock ----------
+  const t0 = performance.now();
+  setInterval(() => { const s = Math.floor((performance.now() - t0) / 1000); $('clock').textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }, 1000);
+
+  // ---------- protocol (editable) ----------
+  const proto = { depthDeg: 100, topDeg: 160, reps: 12, slowestS: 4.0, cue: 'Go a little deeper' };
+  const bind = (id, key, parse) => { const el = $(id); const apply = () => { proto[key] = parse(el.value); if (key === 'reps') $('rep-target').textContent = proto.reps; }; el.addEventListener('input', apply); apply(); };
+  bind('p-depth', 'depthDeg', Number); bind('p-top', 'topDeg', Number); bind('p-reps', 'reps', Number); bind('p-tempo', 'slowestS', Number); bind('p-cue', 'cue', (v) => v);
+  const sls = { passS: 20, bandCm: 2, armDeg: 30, maxS: 30 };
+  const bindS = (id, key) => { const el = $(id); const apply = () => { sls[key] = Number(el.value); if (key === 'passS') $('sls-target').textContent = sls.passS; }; el.addEventListener('input', apply); apply(); };
+  bindS('s-pass', 'passS'); bindS('s-band', 'bandCm'); bindS('s-arm', 'armDeg'); bindS('s-max', 'maxS');
+
+  // ---------- simulated person: squat cycle ----------
+  // The skeleton is procedural. The rep counter below is the real algorithm run on its knee angle.
+  const sim = { running: false, paused: false, t: 0, period: 2.5, restUntil: 0, cycleStart: 0, variation: 0.85 };
+  function depthAt(t) {
+    if (!sim.running || sim.paused) return 0;
+    if (t < sim.restUntil) return 0;
+    const u = (t - sim.cycleStart) / sim.period;
+    if (u >= 1) { // next rep: vary tempo and depth, occasional rest
+      sim.cycleStart = t; sim.period = 2.0 + Math.random() * 1.2; sim.variation = 0.62 + Math.random() * 0.4;
+      if (Math.random() < 0.18) sim.restUntil = t + 1.2 + Math.random();
+      return 0;
+    }
+    return sim.variation * (0.5 - 0.5 * Math.cos(2 * Math.PI * u));
+  }
+  function pose(d, time) {
+    // Front-facing figure in an 800x600 frame. d = squat depth 0..1.
+    const cx = 400, floor = 540;
+    const hipY = 330 + 95 * d, kneeY = 440 + 12 * d, ankleY = floor;
+    const spread = 34 + 26 * d, kneeSpread = 42 + 44 * d;
+    const shoulderY = hipY - 125 + 14 * d, headY = shoulderY - 62;
+    const sway = Math.sin(time * 1.7) * 3;
+    const armUp = d; // arms come forward/up as the person squats
+    const wristY = shoulderY + 90 - 120 * armUp, wristX = 86 + 30 * armUp;
+    const elbowY = shoulderY + 55 - 50 * armUp;
+    const j = {
+      nose: [cx + sway, headY - 16], leye: [cx - 10 + sway, headY - 26], reye: [cx + 10 + sway, headY - 26],
+      lsho: [cx - 56 + sway, shoulderY], rsho: [cx + 56 + sway, shoulderY],
+      lelb: [cx - 80 + sway, elbowY], relb: [cx + 80 + sway, elbowY],
+      lwri: [cx - wristX + sway, wristY], rwri: [cx + wristX + sway, wristY],
+      lhip: [cx - spread + sway, hipY], rhip: [cx + spread + sway, hipY],
+      lkne: [cx - kneeSpread + sway * 0.5, kneeY], rkne: [cx + kneeSpread + sway * 0.5, kneeY],
+      lank: [cx - 40, ankleY], rank: [cx + 40, ankleY],
+    };
+    const kneeAngle = 175 - 82 * d + (Math.random() - 0.5) * 2.5;      // degrees, the rule input
+    const hipAngle = 172 - 90 * d + (Math.random() - 0.5) * 2.5;
+    const trunk = 4 + 14 * d;
+    return { j, kneeAngle, hipAngle, trunk };
+  }
+
+  // ---------- rep counter: hysteresis state machine (the real rule) ----------
+  const counter = { state: 'standing', reps: 0, minKnee: 180, downAt: 0, log: [], lastUp: null };
+  function stepCounter(kneeAngle, now) {
+    const c = counter;
+    if (c.state === 'standing' && kneeAngle < proto.topDeg - 10) { c.state = 'down'; c.downAt = now; c.minKnee = kneeAngle; }
+    else if (c.state === 'down') { c.minKnee = Math.min(c.minKnee, kneeAngle); if (kneeAngle <= proto.depthDeg) c.state = 'bottom'; else if (kneeAngle > proto.topDeg) c.state = 'standing'; }
+    else if (c.state === 'bottom') { c.minKnee = Math.min(c.minKnee, kneeAngle); if (kneeAngle > proto.depthDeg + 15) c.state = 'up'; }
+    else if (c.state === 'up') {
+      c.minKnee = Math.min(c.minKnee, kneeAngle);
+      if (kneeAngle > proto.topDeg) { finishRep(now); c.state = 'standing'; }
+    }
+    // A shallow attempt: went down but came back without reaching depth
+    if (c.state === 'standing' && c.downAt && c.minKnee > proto.depthDeg && c.minKnee < proto.topDeg - 10 && c.log.length === c.reps && now - c.downAt > 0.6 && !c.pendingShallow) {
+      c.pendingShallow = true; setCue('warn', proto.cue, 'Last attempt reached ' + Math.round(c.minKnee) + '°, protocol needs ≤ ' + proto.depthDeg + '°'); c.downAt = 0; c.minKnee = 180; setTimeout(() => { c.pendingShallow = false; }, 1500);
+    }
+  }
+  function finishRep(now) {
+    const c = counter; c.reps += 1;
+    const dur = now - c.downAt; const depth = Math.max(0, Math.min(1, (175 - c.minKnee) / (175 - proto.depthDeg)));
+    const slow = dur > proto.slowestS;
+    const cue = depth < 1 ? proto.cue : slow ? 'A little quicker on the way up' : 'Good rep';
+    c.log.push({ n: c.reps, dur, minKnee: c.minKnee, depth: Math.min(depth, 1), cue, source: 'rules' });
+    c.downAt = 0; c.minKnee = 180;
+    setCue(depth < 1 || slow ? 'warn' : 'good', cue, 'Rep ' + c.reps + ' · ' + dur.toFixed(2) + ' s · depth ' + Math.min(depth, 1).toFixed(2));
+    renderReps();
+    if (c.reps >= proto.reps) stopSet(true);
+  }
+  function setCue(kind, title, sub) { const el = $('cue'); el.className = 'cue ' + (kind === 'good' ? 'good' : ''); el.innerHTML = '<b></b><small></small>'; el.querySelector('b').textContent = title; el.querySelector('small').textContent = sub; }
+  function renderReps() {
+    const c = counter;
+    $('rep-count').textContent = c.reps;
+    const pct = Math.min(1, c.reps / proto.reps); $('ring').setAttribute('stroke-dashoffset', String(264 * (1 - pct))); $('ring-pct').textContent = Math.round(pct * 100) + '%';
+    const last = c.log[c.log.length - 1];
+    $('last-dur').textContent = last ? last.dur.toFixed(2) + ' s' : '—';
+    $('last-depth').textContent = last ? last.depth.toFixed(2) : '—';
+    if (c.log.length >= 2) { const a = c.log[c.log.length - 2], b = last; $('tempo').textContent = (60 / Math.max(0.5, b.dur)).toFixed(0) + '/min'; } else $('tempo').textContent = '—';
+    const strip = $('reps-strip'); strip.innerHTML = '';
+    c.log.forEach((r) => { const i = document.createElement('i'); i.style.height = Math.max(8, r.depth * 44) + 'px'; if (r.depth < 1) i.className = 'low'; i.title = 'Rep ' + r.n + ' depth ' + r.depth.toFixed(2); strip.appendChild(i); });
+    const rows = $('rep-rows'); rows.innerHTML = '';
+    if (!c.log.length) { rows.innerHTML = '<tr><td colspan="6" style="color:var(--muted)">No reps yet. Press Start set.</td></tr>'; }
+    c.log.slice().reverse().forEach((r) => { const tr = document.createElement('tr'); tr.innerHTML = '<td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td><td></td><td></td>'; const td = tr.children; td[0].textContent = r.n; td[1].textContent = r.dur.toFixed(2) + ' s'; td[2].textContent = Math.round(r.minKnee) + '°'; td[3].textContent = r.depth.toFixed(2); td[4].textContent = r.cue; td[5].textContent = r.source; rows.appendChild(tr); });
+    $('sum-reps').textContent = c.reps;
+    if (c.log.length) { const d = c.log.map((r) => r.dur).sort((a, b) => a - b); $('sum-med').textContent = d[Math.floor(d.length / 2)].toFixed(2); $('sum-form').textContent = (c.log.reduce((s, r) => s + r.depth, 0) / c.log.length).toFixed(2); }
+    document.querySelectorAll('#phase span').forEach((s) => s.classList.toggle('on', s.dataset.p === c.state));
+  }
+  function startSet() { Object.assign(counter, { state: 'standing', reps: 0, minKnee: 180, downAt: 0, log: [] }); sim.running = true; sim.paused = false; sim.cycleStart = performance.now() / 1000 + 0.8; sim.restUntil = sim.cycleStart; $('btn-start').disabled = true; $('btn-pause').disabled = false; $('btn-stop').disabled = false; $('clf').textContent = 'running · agrees'; setCue('good', 'Go', 'First rep when you are ready.'); renderReps(); }
+  function pauseSet() { sim.paused = !sim.paused; $('btn-pause').textContent = sim.paused ? 'Resume' : 'Pause'; }
+  function stopSet(complete) { sim.running = false; $('btn-start').disabled = false; $('btn-start').textContent = 'Start next set'; $('btn-pause').disabled = true; $('btn-pause').textContent = 'Pause'; $('btn-stop').disabled = true; $('clf').textContent = 'standby'; setCue('good', complete ? 'Set complete' : 'Set saved', 'session_summary written · ' + counter.reps + ' reps'); renderReps(); }
+  $('btn-start').addEventListener('click', startSet); $('btn-pause').addEventListener('click', pauseSet); $('btn-stop').addEventListener('click', () => stopSet(false));
+
+  // ---------- camera canvas ----------
+  const cam = $('cam'), ctx = cam.getContext('2d');
+  const bones = [['lsho', 'rsho'], ['lsho', 'lelb'], ['lelb', 'lwri'], ['rsho', 'relb'], ['relb', 'rwri'], ['lsho', 'lhip'], ['rsho', 'rhip'], ['lhip', 'rhip'], ['lhip', 'lkne'], ['lkne', 'lank'], ['rhip', 'rkne'], ['rkne', 'rank']];
+  let fpsCount = 0, fpsAt = performance.now();
+  function drawCam(p) {
+    const w = cam.width, h = cam.height;
+    ctx.clearRect(0, 0, w, h);
+    // floor line and depth marker
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+    for (let y = 120; y < h; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.beginPath(); ctx.moveTo(60, 542); ctx.lineTo(w - 60, 542); ctx.stroke();
+    // body silhouette (soft)
+    const j = p.j;
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.beginPath(); ctx.ellipse(j.nose[0], j.nose[1] + 4, 28, 34, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(j.lsho[0] - 14, j.lsho[1]); ctx.lineTo(j.rsho[0] + 14, j.rsho[1]); ctx.lineTo(j.rhip[0] + 10, j.rhip[1] + 10); ctx.lineTo(j.lhip[0] - 10, j.lhip[1] + 10); ctx.closePath(); ctx.fill();
+    // bones
+    const accent = css('--accent') || '#5fc4b4';
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = accent; ctx.globalAlpha = 0.95;
+    bones.forEach(([a, b]) => { ctx.beginPath(); ctx.moveTo(j[a][0], j[a][1]); ctx.lineTo(j[b][0], j[b][1]); ctx.stroke(); });
+    ctx.globalAlpha = 1;
+    // joints
+    Object.keys(j).forEach((k) => { const [x, y] = j[k]; ctx.beginPath(); ctx.arc(x, y, k === 'nose' ? 9 : 6, 0, Math.PI * 2); ctx.fillStyle = accent; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.stroke(); });
+    // knee angle arc + label
+    const kx = j.rkne[0], ky = j.rkne[1];
+    ctx.beginPath(); ctx.arc(kx, ky, 22, Math.PI * 1.1, Math.PI * 1.9); ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.font = '600 15px "IBM Plex Mono", monospace'; ctx.fillStyle = '#f0f4f2'; ctx.fillText(Math.round(p.kneeAngle) + '°', kx + 26, ky - 10);
+    // depth target line
+    const targetY = 330 + 95 * ((175 - proto.depthDeg) / 82);
+    ctx.setLineDash([6, 6]); ctx.strokeStyle = 'rgba(227,164,74,0.8)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(250, targetY); ctx.lineTo(550, targetY); ctx.stroke(); ctx.setLineDash([]);
+    ctx.font = '12px "IBM Plex Mono", monospace'; ctx.fillStyle = 'rgba(227,164,74,0.95)'; ctx.fillText('hip depth target', 556, targetY + 4);
+    // bounding box
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1; ctx.strokeRect(j.lkne[0] - 60, j.nose[1] - 50, (j.rkne[0] - j.lkne[0]) + 120, 542 - (j.nose[1] - 50));
+    ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillText('person 0.97', j.lkne[0] - 60, j.nose[1] - 56);
+  }
+  function tick() {
+    const now = performance.now() / 1000;
+    const d = depthAt(now);
+    const p = pose(d, now);
+    if (sim.running && !sim.paused) stepCounter(p.kneeAngle, now);
+    drawCam(p);
+    $('angles').innerHTML = '<span>knee R ' + Math.round(p.kneeAngle) + '° · L ' + Math.round(p.kneeAngle + 1.4) + '°</span><span>hip ' + Math.round(p.hipAngle) + '° · trunk lean ' + Math.round(p.trunk) + '°</span>';
+    document.querySelectorAll('#phase span').forEach((s) => s.classList.toggle('on', s.dataset.p === counter.state));
+    fpsCount++; if (performance.now() - fpsAt > 1000) { $('fps').textContent = Math.min(30, fpsCount); fpsCount = 0; fpsAt = performance.now(); }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // ---------- single-leg stance test ----------
+  const swayC = $('sway'), sctx = swayC.getContext('2d');
+  const test = { running: false, start: 0, series: [], events: [], outside: false, armEvent: false, timer: null };
+  function fitCanvas(c) { const r = c.getBoundingClientRect(); const dpr = window.devicePixelRatio || 1; if (r.width && (c.width !== Math.round(r.width * dpr))) { c.width = Math.round(r.width * dpr); c.height = Math.round(parseFloat(getComputedStyle(c).height) * dpr); } return dpr; }
+  function drawSway() {
+    const dpr = fitCanvas(swayC); const w = swayC.width, h = swayC.height; sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const W = w / dpr, H = h / dpr; sctx.clearRect(0, 0, W, H);
+    const padL = 34, padR = 10, padT = 10, padB = 24; const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+    const maxS = sls.maxS, range = Math.max(4, sls.bandCm * 2.5);
+    const X = (t) => x0 + (t / maxS) * (x1 - x0), Y = (v) => (y0 + y1) / 2 - (v / range) * ((y1 - y0) / 2);
+    const line = css('--line'), muted = css('--muted'), accent = css('--accent'), soft = css('--accent-soft');
+    // band
+    sctx.fillStyle = soft; sctx.globalAlpha = 0.7; sctx.fillRect(x0, Y(sls.bandCm), x1 - x0, Y(-sls.bandCm) - Y(sls.bandCm)); sctx.globalAlpha = 1;
+    // grid
+    sctx.strokeStyle = line; sctx.lineWidth = 1; [-range, -range / 2, 0, range / 2, range].forEach((v) => { sctx.beginPath(); sctx.moveTo(x0, Y(v)); sctx.lineTo(x1, Y(v)); sctx.stroke(); });
+    sctx.fillStyle = muted; sctx.font = '11px "IBM Plex Mono", monospace'; sctx.textAlign = 'right';
+    [range, 0, -range].forEach((v) => sctx.fillText((v > 0 ? '+' : '') + v.toFixed(0), x0 - 6, Y(v) + 4));
+    sctx.textAlign = 'center'; [0, maxS / 2, maxS].forEach((t) => sctx.fillText(t + ' s', X(t), H - 8));
+    sctx.textAlign = 'left'; sctx.fillText('± ' + sls.bandCm + ' cm band', x0 + 6, Y(sls.bandCm) - 4);
+    // trace
+    if (test.series.length > 1) {
+      sctx.strokeStyle = accent; sctx.lineWidth = 2; sctx.lineJoin = 'round'; sctx.beginPath();
+      test.series.forEach((p, i) => { const x = X(p.t), y = Y(p.v); if (i) sctx.lineTo(x, y); else sctx.moveTo(x, y); }); sctx.stroke();
+      const last = test.series[test.series.length - 1]; sctx.beginPath(); sctx.arc(X(last.t), Y(last.v), 4, 0, Math.PI * 2); sctx.fillStyle = accent; sctx.fill(); sctx.lineWidth = 2; sctx.strokeStyle = css('--panel'); sctx.stroke();
+    }
+    // event markers
+    sctx.fillStyle = css('--warn'); test.events.forEach((e) => { sctx.beginPath(); sctx.arc(X(e.t), y0 + 4, 3, 0, Math.PI * 2); sctx.fill(); });
+  }
+  function addEvent(t, text) { test.events.push({ t, text }); const list = $('sls-events'); if (test.events.length === 1) list.innerHTML = ''; const d = document.createElement('div'); d.className = 'event'; d.innerHTML = '<span></span><time></time>'; d.firstChild.textContent = text; d.lastChild.textContent = t.toFixed(1) + ' s'; list.prepend(d); }
+  function startTest() {
+    Object.assign(test, { running: true, start: performance.now() / 1000, series: [], events: [], outside: false, v: 0, vel: 0 });
+    $('sls-events').innerHTML = '<div class="event"><span>None yet</span></div>'; $('sls-result').innerHTML = '<span class="verdict">Running</span><span class="band">Events are logged against the protocol thresholds.</span>';
+    $('sls-start').disabled = true; $('sls-stop').disabled = false;
+    // Simulated sway: bounded random walk that drifts more as fatigue grows; stops on its own between 15 and 28 s.
+    test.endAt = 15 + Math.random() * 13;
+    test.timer = setInterval(() => {
+      const t = performance.now() / 1000 - test.start;
+      const fatigue = 1 + t / 12;
+      test.vel += (Math.random() - 0.5) * 0.55 * fatigue; test.vel *= 0.86; test.v = Math.max(-5, Math.min(5, test.v * 0.97 + test.vel * 0.3));
+      test.series.push({ t, v: test.v });
+      const out = Math.abs(test.v) > sls.bandCm; if (out && !test.outside) addEvent(t, 'sway beyond ± ' + sls.bandCm + ' cm'); test.outside = out;
+      if (!test.armEvent && t > 6 && Math.random() < 0.012) { test.armEvent = true; addEvent(t, 'arm abduction > ' + sls.armDeg + '°'); }
+      $('sls-time').textContent = t.toFixed(1); drawSway();
+      if (t >= test.endAt || t >= sls.maxS) endTest(t >= sls.maxS ? 'time limit' : 'foot down');
+    }, 100);
+  }
+  function endTest(reason) {
+    if (!test.running) return; test.running = false; clearInterval(test.timer);
+    const t = performance.now() / 1000 - test.start; $('sls-time').textContent = t.toFixed(1); addEvent(t, 'test ended · ' + reason);
+    const pass = t >= sls.passS; const maxSway = test.series.reduce((m, p) => Math.max(m, Math.abs(p.v)), 0);
+    $('sls-result').innerHTML = '<span class="verdict ' + (pass ? 'pass' : 'fail') + '"></span><span class="band"></span><span class="band"></span>';
+    const r = $('sls-result').children; r[0].textContent = (pass ? 'Pass' : 'Below threshold') + ' · ' + t.toFixed(1) + ' s'; r[1].textContent = 'Protocol SLS-01 pass at ≥ ' + sls.passS + ' s · max sway ' + maxSway.toFixed(1) + ' cm · ' + (test.events.length - 1) + ' events'; r[2].textContent = 'Baseline 9.1 s · change ' + (t - 9.1 >= 0 ? '+' : '') + (t - 9.1).toFixed(1) + ' s · saved for clinician review';
+    $('sls-start').disabled = false; $('sls-stop').disabled = true; $('sls-start').textContent = 'Run again';
+  }
+  $('sls-start').addEventListener('click', startTest); $('sls-stop').addEventListener('click', () => endTest('foot down'));
+  drawSway(); window.addEventListener('resize', () => { drawSway(); if (!$('screen-progress').hidden) drawProgress(null); if (!$('screen-device').hidden) drawLatency(); });
+
+  // ---------- progress chart ----------
+  const sessions = [{ d: '17 Oct', v: 8, med: 2.4, form: 0.62, base: true }, { d: '24 Oct', v: 9, med: 2.3, form: 0.66 }, { d: '31 Oct', v: 11, med: 2.1, form: 0.74 }, { d: '7 Nov', v: 12, med: 2.0, form: 0.78 }, { d: '14 Nov', v: 13, med: 1.9, form: 0.81 }];
+  const pc = $('progress'), pctx = pc.getContext('2d'); let bars = [];
+  function drawProgress(hover) {
+    const dpr = fitCanvas(pc); pctx.setTransform(dpr, 0, 0, dpr, 0, 0); const W = pc.width / dpr, H = pc.height / dpr; pctx.clearRect(0, 0, W, H);
+    const padL = 30, padR = 10, padT = 14, padB = 26; const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB; const max = 16;
+    const Y = (v) => y1 - (v / max) * (y1 - y0);
+    pctx.strokeStyle = css('--line'); pctx.lineWidth = 1; pctx.fillStyle = css('--muted'); pctx.font = '11px "IBM Plex Mono", monospace'; pctx.textAlign = 'right';
+    [0, 4, 8, 12, 16].forEach((v) => { pctx.beginPath(); pctx.moveTo(x0, Y(v)); pctx.lineTo(x1, Y(v)); pctx.stroke(); pctx.fillText(v, x0 - 6, Y(v) + 4); });
+    const n = sessions.length, slot = (x1 - x0) / n, bw = Math.min(44, slot * 0.5); bars = [];
+    sessions.forEach((s, i) => {
+      const x = x0 + slot * i + (slot - bw) / 2, y = Y(s.v); bars.push({ x, y, w: bw, h: y1 - y, s });
+      pctx.fillStyle = css('--accent'); pctx.globalAlpha = hover === null || hover === i ? 1 : 0.45;
+      pctx.beginPath(); pctx.moveTo(x, y1); pctx.lineTo(x, y + 4); pctx.arcTo(x, y, x + 4, y, 4); pctx.lineTo(x + bw - 4, y); pctx.arcTo(x + bw, y, x + bw, y + 4, 4); pctx.lineTo(x + bw, y1); pctx.closePath(); pctx.fill(); pctx.globalAlpha = 1;
+      pctx.fillStyle = css('--muted'); pctx.textAlign = 'center'; pctx.fillText(s.d, x + bw / 2, H - 8);
+      if (i === 0 || i === n - 1 || hover === i) { pctx.fillStyle = css('--fg'); pctx.fillText(s.v, x + bw / 2, y - 6); }
+    });
+    pctx.setLineDash([5, 4]); pctx.strokeStyle = css('--warn'); pctx.lineWidth = 1.5; pctx.beginPath(); pctx.moveTo(x0, Y(8)); pctx.lineTo(x1, Y(8)); pctx.stroke(); pctx.setLineDash([]);
+    pctx.fillStyle = css('--warn'); pctx.textAlign = 'right'; pctx.fillText('baseline 8', x1 - 4, Y(8) - 5);
+  }
+  pc.addEventListener('mousemove', (e) => { const r = pc.getBoundingClientRect(); const mx = e.clientX - r.left; let hit = null; bars.forEach((b, i) => { if (mx >= b.x - 8 && mx <= b.x + b.w + 8) hit = i; }); drawProgress(hit); $('progress-tip').textContent = hit === null ? 'Hover a bar for the session details.' : sessions[hit].d + ': ' + sessions[hit].v + ' stands · median rep ' + sessions[hit].med + ' s · form ' + sessions[hit].form + (sessions[hit].base ? ' · baseline' : ''); });
+  pc.addEventListener('mouseleave', () => { drawProgress(null); $('progress-tip').textContent = 'Hover a bar for the session details.'; });
+  $('btn-export').addEventListener('click', () => { const payload = { participant: 'P-A', protocol: 'CS-30', sessions }; navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(payload, null, 1)).then(() => { $('export-note').textContent = 'Report JSON copied to the clipboard.'; }).catch(() => { $('export-note').textContent = 'Clipboard unavailable here; the report is written to data/reports/ on the device.'; }); });
+  $('btn-replay').addEventListener('click', () => { show('session'); startSet(); });
+
+  // ---------- latency sparkline ----------
+  const lc = $('latency'), lctx = lc.getContext('2d');
+  function drawLatency() {
+    const dpr = fitCanvas(lc); lctx.setTransform(dpr, 0, 0, dpr, 0, 0); const W = lc.width / dpr, H = lc.height / dpr; lctx.clearRect(0, 0, W, H);
+    const pts = []; let v = 36; for (let i = 0; i < 60; i++) { v += (Math.random() - 0.5) * 6; v = Math.max(28, Math.min(70, v * 0.9 + 36 * 0.1)); if (i === 41) v = 64; pts.push(v); }
+    const padL = 34, padR = 10, padT = 10, padB = 22, x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB; const Y = (ms) => y1 - ((ms - 20) / 60) * (y1 - y0);
+    lctx.strokeStyle = css('--line'); lctx.fillStyle = css('--muted'); lctx.font = '11px "IBM Plex Mono", monospace'; lctx.textAlign = 'right';
+    [20, 40, 60, 80].forEach((ms) => { lctx.beginPath(); lctx.moveTo(x0, Y(ms)); lctx.lineTo(x1, Y(ms)); lctx.stroke(); lctx.fillText(ms + ' ms', x0 - 6, Y(ms) + 4); });
+    lctx.setLineDash([5, 4]); lctx.strokeStyle = css('--warn'); lctx.beginPath(); lctx.moveTo(x0, Y(66.7)); lctx.lineTo(x1, Y(66.7)); lctx.stroke(); lctx.setLineDash([]); lctx.textAlign = 'left'; lctx.fillStyle = css('--warn'); lctx.fillText('15 fps budget', x0 + 4, Y(66.7) - 4);
+    lctx.strokeStyle = css('--accent'); lctx.lineWidth = 2; lctx.beginPath(); pts.forEach((p, i) => { const x = x0 + (i / 59) * (x1 - x0); if (i) lctx.lineTo(x, Y(p)); else lctx.moveTo(x, Y(p)); }); lctx.stroke();
+    lctx.fillStyle = css('--muted'); lctx.textAlign = 'center'; [0, 30, 60].forEach((s) => lctx.fillText('-' + (60 - s) + ' s', x0 + (s / 60) * (x1 - x0), H - 6));
+  }
+
+  // Start the page in a live state so the first view shows what the tool does.
+  startSet();
+})();
+</script>
+
+</body>
+</html>
