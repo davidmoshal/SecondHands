@@ -1,5 +1,9 @@
 # Wiki change log
 
+## 2026-10-17 — Fitness tracker confirmed as the project direction
+
+Recorded the user's confirmation that the camera-based fitness tracker is the project and the assistive-control pages are a previous idea awaiting the team's update. Resolved SH-Q-005 in [the tech stack](design/tech-stack.md#sh-q-005--how-does-the-movement-tracker-relate-to-secondhands) with its alternatives preserved, re-scoped SH-T-047 in [the plan](plan.md#movement-tracker) to the Wiki update, added the decision to [Project direction](project.md#established-user-direction), pointed [the index](index.md) at the tracker first, and added superseded notices to [the proposal](proposal.md) and the README. No older page was rewritten.
+
 ## 2026-10-17 — YOLO pose ExecuTorch export recorded
 
 Added [the YOLO pose ExecuTorch export observation](experiments-before-saturday.md#yolo-pose-executorch-export-observation) from the new locked `experiments/yolo_pose_executorch.py` check, its [runbook section](runbooks/mac-and-snapdragon-development.md#run-the-yolo-pose-executorch-export-check), and the `just smoke-yolo-pose-executorch` recipe. Updated [the tech stack](design/tech-stack.md) perception, plan, and evidence text, noted the React and Bun frontend direction from the unmerged `dm/react-ui` branch, checked SH-T-049 in [the plan](plan.md#movement-tracker), and revised source SH-S-017. The run was in a Linux x86-64 container; Mac, laptop, and NPU execution remain unverified.
